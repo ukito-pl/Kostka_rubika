@@ -42,12 +42,17 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
     int katX=0;
     int katY=0;
     int katZ=0;
+    int katXDocelowy=0;
+    int katYDocelowy=0;
+    int katZDocelowy=0;
     boolean zplus =false;
     boolean zminus =false;
     boolean xplus =false;
     boolean xminus =false;
+    boolean obroconoZ = false;
+    boolean obroconoX = false;
     TransformGroup kostka;
-    Timer tm = new Timer(1,this);
+    Timer tm = new Timer(5,this);
     
     
    
@@ -97,7 +102,6 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
     public Transform3D obrot(){
       
         Transform3D  p_kostki   = new Transform3D();
-        //p_kostki.set(new Vector3f(-0.4f,0.0f,0.0f));                             //przemieszczenie w przestrzeni o wektor
 
         Transform3D  tmp_rotX      = new Transform3D();
         tmp_rotX.rotX(PI/180*katX);
@@ -117,38 +121,67 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
        
         
 
-        TransformGroup transformacja_k = new TransformGroup(pio);
-        transformacja_k.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
+        TransformGroup transformacja_kostka = new TransformGroup(pio);
+        transformacja_kostka.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
         
         ColorCube cc = new ColorCube(0.1);
-        QuadArray kostka = new QuadArray(24, QuadArray.COORDINATES
+        QuadArray szescianGeom = new QuadArray(24, QuadArray.COORDINATES
                 | QuadArray.COLOR_4);
-        kostka = (QuadArray) cc.getGeometry();
+        szescianGeom = (QuadArray) cc.getGeometry();
         for(int i = 0; i <= 3; i++){
-            kostka.setColor(i, new Color3f(1,1,1));
+            szescianGeom.setColor(i, new Color3f(1,1,1));
         }
         for(int i = 4; i <= 7; i++){
-            kostka.setColor(i, new Color3f(0,1,0));
+            szescianGeom.setColor(i, new Color3f(0,1,0));
         }
         for(int i = 8; i <= 11; i++){
-            kostka.setColor(i, new Color3f(1,0,0));
+            szescianGeom.setColor(i, new Color3f(1,0,0));
         }
         for(int i = 12; i <= 15; i++){
-            kostka.setColor(i, new Color3f(0,0,1));
+            szescianGeom.setColor(i, new Color3f(0,0,1));
         }
         for(int i = 16; i <= 19; i++){
-            kostka.setColor(i, new Color3f(1,1,0));
+            szescianGeom.setColor(i, new Color3f(1,1,0));
         }
         for(int i = 20; i <= 23; i++){
-            kostka.setColor(i, new Color3f(1,0.6f,0));
+            szescianGeom.setColor(i, new Color3f(1,0.6f,0));
         }
         
-        Shape3D kostka1 = new Shape3D(kostka);
-        transformacja_k.addChild(kostka1);
+        Shape3D szescian[] = new Shape3D[27];
+        szescian[0] = new Shape3D(szescianGeom);
+        transformacja_kostka.addChild(szescian[0]);
+        TransformGroup przesunietySzescian[] = new TransformGroup[27];
+        //wspołrzędne każdego szescianu skłądającego się na kostkę:(wypadałoby zrobić to jakąś funkcją ale nie miałem pomysłu, więc wpisałem po chamsku współrzędne każdego sześcianu)
+        float[] przesuniecieX = {0f,0.2f,0.2f,0.2f,0.2f,0.2f,0.2f,0.2f,0.2f,0.2f,0f,0f,0f,0f,0f,0f,0f,0f,
+                                 -0.2f,-0.2f,-0.2f,-0.2f,-0.2f,-0.2f,-0.2f,-0.2f,-0.2f};
+        float[] przesuniecieY = {0f,0f,0f,0f,0.2f,0.2f,0.2f, -0.2f,-0.2f,-0.2f,0f,0f,0.2f,0.2f,0.2f, -0.2f,-0.2f,-0.2f,
+                                0f,0f,0f, 0.2f,0.2f,0.2f, -0.2f,-0.2f, -0.2f};
+        float[] przesuniecieZ = {0f,0f,0.2f,-0.2f,0f,0.2f, -0.2f,0f,0.2f, -0.2f,0.2f,-0.2f,0f,0.2f,-0.2f,0f,0.2f,-0.2f, 
+                                0f,0.2f,-0.2f,0f,0.2f,-0.2f,-0.2f,0.2f,0f};
+        
+        for(int i=1; i <= 26; i++){
+            szescian[i] = new Shape3D(szescianGeom);
+            przesunietySzescian[i] = new TransformGroup();
+            przesunietySzescian[i].setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
+            przesunietySzescian[i].addChild(dodajSzescian(szescian[i], new Vector3f(przesuniecieX[i],przesuniecieY[i],przesuniecieZ[i])));
+        }
+        for (int i = 1; i <=26; i++ ){
+        transformacja_kostka.addChild(przesunietySzescian[i]);
+        }
     
-        return transformacja_k;
+        return transformacja_kostka;
     }
     
+    public TransformGroup dodajSzescian(Shape3D szescian, Vector3f wektorPrzesuniecia){
+        
+        Transform3D przesuniecie = new Transform3D();
+        przesuniecie.set(wektorPrzesuniecia);
+        TransformGroup przesuniecieGr = new TransformGroup();
+        przesuniecieGr.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
+        przesuniecieGr.addChild(szescian);
+        przesuniecieGr.setTransform(przesuniecie);
+        return przesuniecieGr;
+    }
 
     public static void main(String[] args) {
         
@@ -169,22 +202,22 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
                     }
                     case KeyEvent.VK_RIGHT:  
                     {
-                        zplus = true;
+                        zminus = true;
                         break; 
                     }
                     case KeyEvent.VK_UP:  
                     {
-                        xplus = true;
+                        xminus = true;
                         break; 
                     }
                     case KeyEvent.VK_DOWN:  
                     {
-                        xminus = true;
+                        xplus = true;
                         break; 
                     }
                     case KeyEvent.VK_LEFT:  
                     {
-                        zminus = true;
+                        zplus = true;
                         break; 
                     }
                     case KeyEvent.VK_E:  
@@ -201,22 +234,23 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
                     }
                     case KeyEvent.VK_RIGHT:  
                     {
-                        zplus = false;
+                        zminus = false;
                         break; 
                     }
                     case KeyEvent.VK_UP:  
                     {
-                        xplus = false;
+                        xminus = false;
                         break; 
                     }
                     case KeyEvent.VK_DOWN:  
                     {
-                        xminus = false;
+                        xplus = false;
                         break; 
                     }
                     case KeyEvent.VK_LEFT:  
                     {
-                        zminus = false;
+                        zplus = false;
+                        
                         break; 
                     }
                     case KeyEvent.VK_E:  
@@ -226,10 +260,47 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (zplus) katZ = katZ +1;
-        if (zminus) katZ = katZ -1;
-        if (xplus) katX = katX +1;
-        if (xminus) katX = katX -1;
+        if (zplus && !obroconoZ) {
+            katZDocelowy = katZ + 90;
+            obroconoZ = true;
+        }
+        if (katZDocelowy > katZ){
+            katZ = katZ +1;
+        }else if (katZDocelowy == katZ){
+            obroconoZ = false;
+        }
+        
+        if (zminus && !obroconoZ) {
+            katZDocelowy = katZ - 90;
+            obroconoZ = true;
+        }
+        if (katZDocelowy < katZ){
+            katZ = katZ -1;
+        }else if (katZDocelowy == katZ){
+            obroconoZ = false;
+        }
+        
+        if (xplus && !obroconoX) {
+            katXDocelowy = katX + 90;
+            obroconoX = true;
+        }
+        if (katXDocelowy > katX){
+            katX = katX + 1;
+        }else if (katXDocelowy == katX){
+            obroconoX = false;
+        }
+        
+        if (xminus && !obroconoX) {
+            katXDocelowy = katX - 90;
+            obroconoX = true;
+        }
+        if (katXDocelowy < katX){
+            katX = katX -1;
+        }else if (katXDocelowy == katX){
+            obroconoX = false;
+        }
+        
+        
         try {kostka.setTransform(obrot());}
         catch(java.lang.NullPointerException b){
         }

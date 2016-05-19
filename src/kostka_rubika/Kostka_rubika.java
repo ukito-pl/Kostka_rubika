@@ -52,7 +52,7 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
     boolean obroconoZ = false;
     boolean obroconoX = false;
     TransformGroup kostka;
-    Timer tm = new Timer(5,this);
+    Timer tm = new Timer(1,this);
     
     
    

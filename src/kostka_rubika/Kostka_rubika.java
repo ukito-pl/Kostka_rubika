@@ -35,7 +35,7 @@ import javax.vecmath.Vector3f;
 
 /**
  *
- * @author ukito
+ * @author ukito && Qahu ;)
  */
 public class Kostka_rubika extends JFrame implements  ActionListener, KeyListener{
     
@@ -51,8 +51,10 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
     boolean xminus =false;
     boolean obroconoZ = false;
     boolean obroconoX = false;
-    TransformGroup kostka;
-    Timer tm = new Timer(1,this);
+    TransformGroup kostki[] = new TransformGroup[27];
+    TransformGroup sciana;
+    //TransformGroup kostka;
+    Timer tm = new Timer(3,this);
     
     
    
@@ -70,19 +72,25 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
 
         Canvas3D canvas3D = new Canvas3D(config);
         canvas3D.setPreferredSize(new Dimension(800,600));
-
+        canvas3D.addKeyListener(this);
+        
         add(canvas3D);
         pack();
         setVisible(true);
-
-        kostka = utworzKostke(obrot());
+              
+        for (int i=0; i<=26; i++){
+            kostki[i] = utworzKostki(i);
+        }
+        sciana = utworzSciane();
+        // kostka = utworzKostke();
         BranchGroup scena = new BranchGroup();
-        scena.addChild(kostka);
+        for (int i=10; i<=26; i++){
+           scena.addChild(kostki[i]);
+        }
+        scena.addChild(sciana);
         scena.setCapability(BranchGroup.ALLOW_DETACH);
         scena.compile();
         
-        
-            
         SimpleUniverse simpleU = new SimpleUniverse(canvas3D);
 
         Transform3D przesuniecie_obserwatora = new Transform3D();
@@ -93,8 +101,6 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
         OrbitBehavior orbit = new OrbitBehavior(canvas3D);
         orbit.setSchedulingBounds(new BoundingSphere());
         simpleU.getViewingPlatform().setViewPlatformBehavior(orbit);
-        
-        simpleU.getCanvas().addKeyListener(this);   // to rozwiązało problem z dzialaniem obrotu po obróceniu sceny myszką
         
         simpleU.addBranchGraph(scena);
     }
@@ -117,11 +123,9 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
     }
     
    
-    public TransformGroup utworzKostke(Transform3D pio){
-       
+    public TransformGroup utworzKostki(int j){
         
-
-        TransformGroup transformacja_kostka = new TransformGroup(pio);
+        TransformGroup transformacja_kostka = new TransformGroup();
         transformacja_kostka.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
         
         ColorCube cc = new ColorCube(0.1);
@@ -147,10 +151,7 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
             szescianGeom.setColor(i, new Color3f(1,0.6f,0));
         }
         
-        Shape3D szescian[] = new Shape3D[27];
-        szescian[0] = new Shape3D(szescianGeom);
-        transformacja_kostka.addChild(szescian[0]);
-        TransformGroup przesunietySzescian[] = new TransformGroup[27];
+        Shape3D szescian = new Shape3D(szescianGeom);
         //wspołrzędne każdego szescianu skłądającego się na kostkę:(wypadałoby zrobić to jakąś funkcją ale nie miałem pomysłu, więc wpisałem po chamsku współrzędne każdego sześcianu)
         float[] przesuniecieX = {0f,0.2f,0.2f,0.2f,0.2f,0.2f,0.2f,0.2f,0.2f,0.2f,0f,0f,0f,0f,0f,0f,0f,0f,
                                  -0.2f,-0.2f,-0.2f,-0.2f,-0.2f,-0.2f,-0.2f,-0.2f,-0.2f};
@@ -158,19 +159,73 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
                                 0f,0f,0f, 0.2f,0.2f,0.2f, -0.2f,-0.2f, -0.2f};
         float[] przesuniecieZ = {0f,0f,0.2f,-0.2f,0f,0.2f, -0.2f,0f,0.2f, -0.2f,0.2f,-0.2f,0f,0.2f,-0.2f,0f,0.2f,-0.2f, 
                                 0f,0.2f,-0.2f,0f,0.2f,-0.2f,-0.2f,0.2f,0f};
-        
-        for(int i=1; i <= 26; i++){
-            szescian[i] = new Shape3D(szescianGeom);
-            przesunietySzescian[i] = new TransformGroup();
-            przesunietySzescian[i].setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
-            przesunietySzescian[i].addChild(dodajSzescian(szescian[i], new Vector3f(przesuniecieX[i],przesuniecieY[i],przesuniecieZ[i])));
-        }
-        for (int i = 1; i <=26; i++ ){
-        transformacja_kostka.addChild(przesunietySzescian[i]);
-        }
-    
+          
+        transformacja_kostka.addChild(dodajSzescian(szescian, new Vector3f(przesuniecieX[j],przesuniecieY[j],przesuniecieZ[j])));
+         
         return transformacja_kostka;
     }
+    
+    
+    public TransformGroup utworzSciane(){
+        TransformGroup s = new TransformGroup();
+        s.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
+        for(int i=1; i<=9; i++){
+            s.addChild(kostki[i]);
+        }
+        return s;
+    }
+    
+    
+//    public TransformGroup utworzKostke(){
+//       
+//        TransformGroup transformacja_kostka = new TransformGroup();
+//        transformacja_kostka.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
+//        
+//        ColorCube cc = new ColorCube(0.1);
+//        QuadArray szescianGeom = new QuadArray(24, QuadArray.COORDINATES
+//                | QuadArray.COLOR_4);
+//        szescianGeom = (QuadArray) cc.getGeometry();
+//        for(int i = 0; i <= 3; i++){
+//            szescianGeom.setColor(i, new Color3f(1,1,1));
+//        }
+//        for(int i = 4; i <= 7; i++){
+//            szescianGeom.setColor(i, new Color3f(0,1,0));
+//        }
+//        for(int i = 8; i <= 11; i++){
+//            szescianGeom.setColor(i, new Color3f(1,0,0));
+//        }
+//        for(int i = 12; i <= 15; i++){
+//            szescianGeom.setColor(i, new Color3f(0,0,1));
+//        }
+//        for(int i = 16; i <= 19; i++){
+//            szescianGeom.setColor(i, new Color3f(1,1,0));
+//        }
+//        for(int i = 20; i <= 23; i++){
+//            szescianGeom.setColor(i, new Color3f(1,0.6f,0));
+//        }
+//        
+//        Shape3D szescian[] = new Shape3D[27];
+//        TransformGroup przesunietySzescian[] = new TransformGroup[27];
+//        //wspołrzędne każdego szescianu skłądającego się na kostkę:(wypadałoby zrobić to jakąś funkcją ale nie miałem pomysłu, więc wpisałem po chamsku współrzędne każdego sześcianu)
+//        float[] przesuniecieX = {0f,0.2f,0.2f,0.2f,0.2f,0.2f,0.2f,0.2f,0.2f,0.2f,0f,0f,0f,0f,0f,0f,0f,0f,
+//                                 -0.2f,-0.2f,-0.2f,-0.2f,-0.2f,-0.2f,-0.2f,-0.2f,-0.2f};
+//        float[] przesuniecieY = {0f,0f,0f,0f,0.2f,0.2f,0.2f, -0.2f,-0.2f,-0.2f,0f,0f,0.2f,0.2f,0.2f, -0.2f,-0.2f,-0.2f,
+//                                0f,0f,0f, 0.2f,0.2f,0.2f, -0.2f,-0.2f, -0.2f};
+//        float[] przesuniecieZ = {0f,0f,0.2f,-0.2f,0f,0.2f, -0.2f,0f,0.2f, -0.2f,0.2f,-0.2f,0f,0.2f,-0.2f,0f,0.2f,-0.2f, 
+//                                0f,0.2f,-0.2f,0f,0.2f,-0.2f,-0.2f,0.2f,0f};
+//        
+//        for(int i=1; i <= 26; i++){
+//            szescian[i] = new Shape3D(szescianGeom);
+//            przesunietySzescian[i] = new TransformGroup();
+//            przesunietySzescian[i].setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
+//            przesunietySzescian[i].addChild(dodajSzescian(szescian[i], new Vector3f(przesuniecieX[i],przesuniecieY[i],przesuniecieZ[i])));
+//        }
+//        for (int i = 1; i <=26; i++ ){
+//        transformacja_kostka.addChild(przesunietySzescian[i]);
+//        }
+//        
+//        return transformacja_kostka;
+//    }
     
     public TransformGroup dodajSzescian(Shape3D szescian, Vector3f wektorPrzesuniecia){
         
@@ -260,48 +315,29 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (zplus && !obroconoZ) {
-            katZDocelowy = katZ + 90;
-            obroconoZ = true;
-        }
-        if (katZDocelowy > katZ){
-            katZ = katZ +1;
-        }else if (katZDocelowy == katZ){
-            obroconoZ = false;
-        }
         
-        if (zminus && !obroconoZ) {
-            katZDocelowy = katZ - 90;
-            obroconoZ = true;
+        if (!obroconoZ){                                      //ciut krótsza wersja ale nie wiem czy Ci się podoba ;) 
+            if (zplus) katZDocelowy = katZ + 90;
+            else if (zminus) katZDocelowy = katZ - 90;
+            obroconoZ = true;             
         }
-        if (katZDocelowy < katZ){
-            katZ = katZ -1;
-        }else if (katZDocelowy == katZ){
-            obroconoZ = false;
+        if (katZDocelowy > katZ) katZ = katZ + 1;
+        else if (katZDocelowy < katZ) katZ = katZ -1;
+        else  obroconoZ = false;
+
+        if (!obroconoX){
+            if (xplus) katXDocelowy = katX + 90;
+            else if (xminus) katXDocelowy = katX - 90;
+            obroconoX = true;             
         }
-        
-        if (xplus && !obroconoX) {
-            katXDocelowy = katX + 90;
-            obroconoX = true;
+        if (katXDocelowy > katX) katX = katX + 1;
+        else if (katXDocelowy < katX) katX = katX -1;
+        else  obroconoX = false;
+
+
+        try {
+        sciana.setTransform(obrot());
         }
-        if (katXDocelowy > katX){
-            katX = katX + 1;
-        }else if (katXDocelowy == katX){
-            obroconoX = false;
-        }
-        
-        if (xminus && !obroconoX) {
-            katXDocelowy = katX - 90;
-            obroconoX = true;
-        }
-        if (katXDocelowy < katX){
-            katX = katX -1;
-        }else if (katXDocelowy == katX){
-            obroconoX = false;
-        }
-        
-        
-        try {kostka.setTransform(obrot());}
         catch(java.lang.NullPointerException b){
         }
     }

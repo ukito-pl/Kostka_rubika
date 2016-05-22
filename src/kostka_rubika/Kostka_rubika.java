@@ -33,6 +33,8 @@ import javax.media.j3d.TransformGroup;
 import javax.media.j3d.TransparencyAttributes;
 import javax.swing.JFrame;
 import javax.swing.Timer;
+import javax.vecmath.AxisAngle4d;
+import javax.vecmath.AxisAngle4f;
 import javax.vecmath.Color3f;
 import javax.vecmath.Vector3f;
 
@@ -48,6 +50,10 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
     int katXDocelowy[][][]={{{0,0,0},{0,0,0},{0,0,0}},{{0,0,0},{0,0,0},{0,0,0}},{{0,0,0},{0,0,0},{0,0,0}}};
     int katYDocelowy[][][]={{{0,0,0},{0,0,0},{0,0,0}},{{0,0,0},{0,0,0},{0,0,0}},{{0,0,0},{0,0,0},{0,0,0}}};
     int katZDocelowy[][][]={{{0,0,0},{0,0,0},{0,0,0}},{{0,0,0},{0,0,0},{0,0,0}},{{0,0,0},{0,0,0},{0,0,0}}};
+    int ilosc_obrotowX[][][]={{{0,0,0},{0,0,0},{0,0,0}},{{0,0,0},{0,0,0},{0,0,0}},{{0,0,0},{0,0,0},{0,0,0}}};
+    int ilosc_obrotowY[][][]={{{0,0,0},{0,0,0},{0,0,0}},{{0,0,0},{0,0,0},{0,0,0}},{{0,0,0},{0,0,0},{0,0,0}}};
+    int ilosc_obrotowZ[][][]={{{0,0,0},{0,0,0},{0,0,0}},{{0,0,0},{0,0,0},{0,0,0}},{{0,0,0},{0,0,0},{0,0,0}}};
+    int ilosc_obrotow[][][]={{{0,0,0},{0,0,0},{0,0,0}},{{0,0,0},{0,0,0},{0,0,0}},{{0,0,0},{0,0,0},{0,0,0}}};
     boolean zplus =false;
     boolean zminus =false;
     boolean xplus =false;
@@ -65,6 +71,8 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
     int nrScianyJ=5;
     int nrScianyK=5;
     int nr =1;
+    int kolejnosc[][][][]; //kolejnosc wybierania obrotów przez użytkownika, x-0, y-1, z-2, pierwszy element jest pusty
+    
     
     Kostka_rubika(){
         super("Kostka rubika");
@@ -99,7 +107,9 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
         scena.setCapability(BranchGroup.ALLOW_CHILDREN_WRITE);
         scena.setCapability(BranchGroup.ALLOW_CHILDREN_EXTEND);
         
-
+        kolejnosc = new int[100][3][3][3];
+        
+        
         for (int i=0; i<=2; i++){
             for (int j=0; j<=2; j++){
                 for (int k=0; k<=2; k++){
@@ -180,6 +190,23 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
         return transformacja_kostka;
     }
     
+    public void dodaj_kolejnosc(int os, int i, int j, int k){
+        //to generuje kolejność wykonywania rotacji dla każdej kostki odwrotną do kolejnosći obrotów wykonywanych przez użytkownika
+       
+        
+        for (int a = ilosc_obrotow[i][j][k]; a > 0; a--){
+            if( a == 1){
+                switch(os){
+                    case 0: kolejnosc[1][i][j][k] = 0;  break;
+                    case 1: kolejnosc[1][i][j][k] = 1;  break;
+                    case 2: kolejnosc[1][i][j][k] = 2;  break;
+                }
+            }else{
+                kolejnosc[a][i][j][k] = kolejnosc[a-1][i][j][k];
+                
+            }
+        }
+    }
     
     public void trans(){
         if (nrScianyI!=5)
@@ -211,17 +238,25 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
      public Transform3D obrot(int i, int j, int k){
         
         Transform3D  p_kostki   = new Transform3D();
-
-        Transform3D  tmp_rotX      = new Transform3D();
-        tmp_rotX.rotX(PI/180*katX[i][j][k]);
-        p_kostki.mul(tmp_rotX);
-        Transform3D  tmp_rotY      = new Transform3D();
-        tmp_rotY.rotY(PI/180*katY[i][j][k]);      
-        p_kostki.mul(tmp_rotY);
-        Transform3D  tmp_rotZ      = new Transform3D();
-        tmp_rotZ.rotZ(PI/180*katZ[i][j][k]);
-        p_kostki.mul(tmp_rotZ);            
-     
+        //tutaj wykonują się rotacje w odpowidniej kolejnosci
+        for(int a = 1; a <= ilosc_obrotow[i][j][k]; a++){
+            
+            switch(kolejnosc[a][i][j][k]){
+                case 0: Transform3D  tmp_rotX      = new Transform3D();
+                        
+                        tmp_rotX.rotX(PI/180*(katX[i][j][k])/ilosc_obrotowX[i][j][k]);
+                        p_kostki.mul(tmp_rotX);
+                        break;
+                case 1: Transform3D  tmp_rotY      = new Transform3D();
+                        tmp_rotY.rotY(PI/180*(katY[i][j][k])/ilosc_obrotowY[i][j][k]);      
+                        p_kostki.mul(tmp_rotY);
+                        break;
+                case 2: Transform3D  tmp_rotZ      = new Transform3D();
+                        tmp_rotZ.rotZ(PI/180*(katZ[i][j][k])/ilosc_obrotowZ[i][j][k]);
+                        p_kostki.mul(tmp_rotZ);
+                        break;
+            }
+        }
         return p_kostki;
     }
    
@@ -385,12 +420,22 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
     public void actionPerformed(ActionEvent e) {                        //ciut krĂłtsza wersja ale nie wiem czy Ci siÄ™ podoba ;) 
 
         if (nrScianyI!=5){
-        if (!obroconoZ){        
+        if (!obroconoZ){  
             for (int j=0; j<=2; j++){
                 for (int k=0; k<=2; k++){                                                          
-                        if (zplus) katZDocelowy[nrScianyI][j][k] = katZ[nrScianyI][j][k] + 90;
-                        else if (zminus) katZDocelowy[nrScianyI][j][k] = katZ[nrScianyI][j][k] - 90;
-                        obroconoZ = true;                 
+                        if (zplus){ 
+                            katZDocelowy[nrScianyI][j][k] = katZ[nrScianyI][j][k] + 90; 
+                            ilosc_obrotowZ[nrScianyI][j][k]++;
+                            ilosc_obrotow[nrScianyI][j][k]++;
+                            dodaj_kolejnosc(2,nrScianyI,j,k );
+                        }
+                        else if (zminus){
+                            katZDocelowy[nrScianyI][j][k] = katZ[nrScianyI][j][k] - 90;
+                            ilosc_obrotowZ[nrScianyI][j][k]++;
+                            ilosc_obrotow[nrScianyI][j][k]++;
+                            dodaj_kolejnosc(2,nrScianyI,j,k );
+                        }
+                        obroconoZ = true;
                 }
             }      
         }
@@ -398,7 +443,7 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
             for (int k=0; k<=2; k++){                                                         
                 if (katZDocelowy[nrScianyI][j][k] > katZ[nrScianyI][j][k]) katZ[nrScianyI][j][k] = katZ[nrScianyI][j][k] + 1;
                 else if (katZDocelowy[nrScianyI][j][k] < katZ[nrScianyI][j][k]) katZ[nrScianyI][j][k] = katZ[nrScianyI][j][k] -1;
-                else obroconoZ = false;              
+                else obroconoZ = false;             
             }
         }      
         }
@@ -407,9 +452,19 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
         if (!obroconoY){
             for (int i=0; i<=2; i++){
                 for (int k=0; k<=2; k++){                                                         
-                        if (yplus) katYDocelowy[i][nrScianyJ][k] = katY[i][nrScianyJ][k] + 90;
-                        else if (yminus) katYDocelowy[i][nrScianyJ][k] = katY[i][nrScianyJ][k] - 90;
-                        obroconoY = true;             
+                        if (yplus) {
+                            katYDocelowy[i][nrScianyJ][k] = katY[i][nrScianyJ][k] + 90;
+                            ilosc_obrotowY[i][nrScianyJ][k]++;
+                            ilosc_obrotow[i][nrScianyJ][k]++;
+                            dodaj_kolejnosc(1,i,nrScianyJ,k);
+                        }
+                        else if (yminus) {
+                            katYDocelowy[i][nrScianyJ][k] = katY[i][nrScianyJ][k] - 90;
+                            ilosc_obrotowY[i][nrScianyJ][k]++;
+                            ilosc_obrotow[i][nrScianyJ][k]++;
+                            dodaj_kolejnosc(1,i,nrScianyJ,k);
+                        }
+                        obroconoY = true;    
                 }
             }
         }
@@ -426,9 +481,20 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
         if (!obroconoX){
             for (int i=0; i<=2; i++){
                 for (int j=0; j<=2; j++){                
-                        if (xplus) katXDocelowy[i][j][nrScianyK] = katX[i][j][nrScianyK] + 90;
-                        else if (xminus) katXDocelowy[i][j][nrScianyK] = katX[i][j][nrScianyK] - 90;
-                        obroconoX = true;             
+                        if (xplus) {
+                            katXDocelowy[i][j][nrScianyK] = katX[i][j][nrScianyK] + 90;
+                            ilosc_obrotowX[i][j][nrScianyK]++;
+                            ilosc_obrotow[i][j][nrScianyK]++;
+                            dodaj_kolejnosc(0,i,j,nrScianyK);
+                        }
+                        else if (xminus) {
+                            katXDocelowy[i][j][nrScianyK] = katX[i][j][nrScianyK] - 90;
+                            ilosc_obrotowX[i][j][nrScianyK]++;
+                            ilosc_obrotow[i][j][nrScianyK]++;
+                            dodaj_kolejnosc(0,i,j,nrScianyK);
+                        }
+                        obroconoX = true;  
+                        
                 }                   
             }
         } 
@@ -436,10 +502,11 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
             for (int j=0; j<=2; j++){
                 if (katXDocelowy[i][j][nrScianyK] > katX[i][j][nrScianyK]) katX[i][j][nrScianyK] = katX[i][j][nrScianyK] + 1;
                 else if (katXDocelowy[i][j][nrScianyK] < katX[i][j][nrScianyK]) katX[i][j][nrScianyK] = katX[i][j][nrScianyK] -1;
-                else  obroconoX = false;
+                else obroconoX = false;
+                }
             }
         }
-        }
+        
         
         try {trans();}
         catch(java.lang.NullPointerException b){}

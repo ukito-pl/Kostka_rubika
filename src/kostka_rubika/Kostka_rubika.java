@@ -49,9 +49,12 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
     int katZDocelowy[];
     int kolejnosc[][];
     int ilosc_obrotow[];
-    int ilosc_obrotowX[];
-    int ilosc_obrotowY[];
-    int ilosc_obrotowZ[];
+    int ilosc_obrotowXplus[];
+    int ilosc_obrotowYplus[];
+    int ilosc_obrotowZplus[];
+    int ilosc_obrotowXminus[];
+    int ilosc_obrotowYminus[];
+    int ilosc_obrotowZminus[];
     int aktywna_sciana = 1;
     boolean zplus =false;
     boolean zminus =false;
@@ -59,9 +62,12 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
     boolean xminus =false;
     boolean yplus = false;
     boolean yminus = false;
-    boolean obroconoZ = false;
-    boolean obroconoY = false;
-    boolean obroconoX = false;
+    boolean obroconoZplus = false;
+    boolean obroconoYplus = false;
+    boolean obroconoXplus = false;
+    boolean obroconoZminus = false;
+    boolean obroconoYminus = false;
+    boolean obroconoXminus = false;
     TransformGroup kostka;
     TransformGroup transformacja_kostka;
     TransformGroup przesunietySzescian[];
@@ -97,9 +103,12 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
         
         kolejnosc = new int[100][27];
         ilosc_obrotow= new int[27];
-        ilosc_obrotowX= new int[27];
-        ilosc_obrotowY= new int[27];
-        ilosc_obrotowZ= new int[27];
+        ilosc_obrotowXplus= new int[27];
+        ilosc_obrotowYplus= new int[27];
+        ilosc_obrotowZplus= new int[27];
+        ilosc_obrotowXminus= new int[27];
+        ilosc_obrotowYminus= new int[27];
+        ilosc_obrotowZminus= new int[27];
         katX = new int[27];
         katY = new int[27];
         katZ = new int[27];
@@ -134,7 +143,7 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
         orbit.setSchedulingBounds(new BoundingSphere());
         simpleU.getViewingPlatform().setViewPlatformBehavior(orbit);
         
-        simpleU.getCanvas().addKeyListener(this);   // to rozwiązało problem z dzialaniem obrotu po obróceniu sceny myszką
+        simpleU.getCanvas().addKeyListener(this);  
         
         simpleU.addBranchGraph(scena);
     }
@@ -147,33 +156,56 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
                 if( szescian[i] == sciana_do_obrotu.getChild(j)){
                     Transform3D  p_kostki   = new Transform3D();                    
                     
-                    int obrocono_X = ilosc_obrotowX[i] - 1;
-                    int obrocono_Y = ilosc_obrotowY[i] - 1;
-                    int obrocono_Z = ilosc_obrotowZ[i] - 1;
+                    int obrocono_Xplus = ilosc_obrotowXplus[i] - 1;
+                    int obrocono_Yplus = ilosc_obrotowYplus[i] - 1;
+                    int obrocono_Zplus = ilosc_obrotowZplus[i] - 1;
+                    int obrocono_Xminus = ilosc_obrotowXminus[i] - 1;
+                    int obrocono_Yminus = ilosc_obrotowYminus[i] - 1;
+                    int obrocono_Zminus = ilosc_obrotowZminus[i] - 1;
+                    int obrocono_X = ilosc_obrotowXplus[i] + ilosc_obrotowXminus[i] - 1;
+                    int obrocono_Y = ilosc_obrotowYplus[i] + ilosc_obrotowYminus[i] - 1;
+                    int obrocono_Z = ilosc_obrotowZplus[i] + ilosc_obrotowZminus[i] - 1;
                     int kat_X = katX[k];
                     int kat_Y = katY[k];
                     int kat_Z = katZ[k];
 
                     for(int a = 1; a <= ilosc_obrotow[i]; a++){
                         switch(kolejnosc[a][i]){
-                            case 0: Transform3D  tmp_rotX      = new Transform3D();
-
-                                    tmp_rotX.rotX(PI/180*(kat_X - 90*obrocono_X));
+                            case 1: Transform3D  tmp_rotXplus      = new Transform3D();
+                                    tmp_rotXplus.rotX(PI/180*(kat_X - 90*obrocono_X));
                                     kat_X = 90*obrocono_X;
                                     obrocono_X--;
-                                    p_kostki.mul(tmp_rotX);
+                                    p_kostki.mul(tmp_rotXplus);
                                     break;
-                            case 1: Transform3D  tmp_rotY      = new Transform3D();
-                                    tmp_rotY.rotY(PI/180*(kat_Y - 90*obrocono_Y));
+                            case -1: Transform3D  tmp_rotXminus      = new Transform3D();
+                                    tmp_rotXminus.rotX(PI/180*(-kat_X + 90*obrocono_X));
+                                    kat_X =  90*obrocono_X;
+                                    obrocono_X--;
+                                    p_kostki.mul(tmp_rotXminus);
+                                    break;
+                            case 2: Transform3D  tmp_rotYplus      = new Transform3D();
+                                    tmp_rotYplus.rotY(PI/180*(kat_Y - 90*obrocono_Y));
                                     kat_Y = 90*obrocono_Y;
                                     obrocono_Y--;
-                                    p_kostki.mul(tmp_rotY);
+                                    p_kostki.mul(tmp_rotYplus);
                                     break;
-                            case 2: Transform3D  tmp_rotZ      = new Transform3D();
-                                    tmp_rotZ.rotZ(PI/180*(kat_Z - 90*obrocono_Z));
+                            case -2:Transform3D  tmp_rotYminus      = new Transform3D();
+                                    tmp_rotYminus.rotY(PI/180*(-kat_Y + 90*obrocono_Y));
+                                    kat_Y =  90*obrocono_Y;
+                                    obrocono_Y--;
+                                    p_kostki.mul(tmp_rotYminus);
+                                    break;
+                            case 3: Transform3D  tmp_rotZplus      = new Transform3D();
+                                    tmp_rotZplus.rotZ(PI/180*(kat_Z - 90*obrocono_Z));
                                     kat_Z = 90*obrocono_Z;
                                     obrocono_Z--;
-                                    p_kostki.mul(tmp_rotZ);
+                                    p_kostki.mul(tmp_rotZplus);
+                                    break;
+                            case -3:Transform3D  tmp_rotZminus     = new Transform3D();
+                                    tmp_rotZminus.rotZ(PI/180*(-kat_Z + 90*obrocono_Z));
+                                    kat_Z =  90*obrocono_Z;
+                                    obrocono_Z--;
+                                    p_kostki.mul(tmp_rotZminus);
                                     break;
                         }
                     }
@@ -201,9 +233,12 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
                         for (int a = ilosc_obrotow[i]; a > 0; a--){
                         if( a == 1){
                             switch(os){
-                                case 0: kolejnosc[1][i] = 0; ilosc_obrotowX[i]++;  break;
-                                case 1: kolejnosc[1][i] = 1; ilosc_obrotowY[i]++; break;
-                                case 2: kolejnosc[1][i] = 2; ilosc_obrotowZ[i]++; break;
+                                case 1: kolejnosc[1][i] = 1; ilosc_obrotowXplus[i]++;  break;
+                                case -1: kolejnosc[1][i] = -1; ilosc_obrotowXminus[i]++;  break;
+                                case 2: kolejnosc[1][i] = 2; ilosc_obrotowYplus[i]++; break;
+                                case -2: kolejnosc[1][i] = -2; ilosc_obrotowYminus[i]++; break;
+                                case 3: kolejnosc[1][i] = 3; ilosc_obrotowZplus[i]++; break;
+                                case -3: kolejnosc[1][i] = -3; ilosc_obrotowZminus[i]++; break;
                             }
                         }else{
                             kolejnosc[a][i] = kolejnosc[a-1][i];
@@ -216,7 +251,7 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
     }
     
     public void obliczPolozenie(int os,int obr){
-        //zmienia wartości położenia każdego szescianu względem nieruchomego układu współrzędnych, jeszcze nie do końca działa
+        //zmienia wartości położenia każdego szescianu względem nieruchomego układu współrzędnych
         for (int i = 1; i <= 26; i++){
             for(int j = 0; j < (sciana_do_obrotu.numChildren()); j++){
                 if( szescian[i] == sciana_do_obrotu.getChild(j)){
@@ -237,21 +272,21 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
                                 }
                                 break;
                         case 1: if(obr == 1){
-                                    przesunietySzescianPolozenie[i].x = - obecnePolozenie.z;
-                                    przesunietySzescianPolozenie[i].z =  obecnePolozenie.x;
-                                }
-                                if(obr == -1){
                                     przesunietySzescianPolozenie[i].x =  obecnePolozenie.z;
                                     przesunietySzescianPolozenie[i].z = - obecnePolozenie.x;
                                 }
+                                if(obr == -1){
+                                    przesunietySzescianPolozenie[i].x = - obecnePolozenie.z;
+                                    przesunietySzescianPolozenie[i].z =  obecnePolozenie.x;
+                                }
                                 break;
                         case 2: if(obr == 1){
-                                    przesunietySzescianPolozenie[i].x =  obecnePolozenie.y;
-                                    przesunietySzescianPolozenie[i].y = - obecnePolozenie.x;
+                                    przesunietySzescianPolozenie[i].x = - obecnePolozenie.y;
+                                    przesunietySzescianPolozenie[i].y = obecnePolozenie.x;
                                 }
                                 if(obr == -1){
-                                    przesunietySzescianPolozenie[i].x = - obecnePolozenie.y;
-                                    przesunietySzescianPolozenie[i].y =  obecnePolozenie.x;
+                                    przesunietySzescianPolozenie[i].x =  obecnePolozenie.y;
+                                    przesunietySzescianPolozenie[i].y = - obecnePolozenie.x;
                                 }
                                 break;      
                         }
@@ -711,105 +746,107 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
     @Override
     public void actionPerformed(ActionEvent e) {
         try {
-            if (zplus && !obroconoZ) {
+            if (zplus && !obroconoZplus) {
                 for(int i = 0; i < 9; i++){
                     katZDocelowy[i] = katZ[i] + 90;
                 }
-                obroconoZ = true;
+                obroconoZplus = true;
                 
-                dodaj_kolejnosc(2);
+                dodaj_kolejnosc(3);
             }
             if (katZDocelowy[0] > katZ[0]){
                 for(int i = 0; i < 9; i++){
                     katZ[i] = katZ[i] +1;
                 }
             }else if (katZDocelowy[0] == katZ[0]){
-                if(obroconoZ) obliczPolozenie(2,1);
-                obroconoZ = false;
+                if(obroconoZplus) obliczPolozenie(2,1);
+                obroconoZplus = false;
                 
             }
             //
-            if (zminus && !obroconoZ) {
+            if (zminus && !obroconoZminus) {
                 for(int i = 0; i < 9; i++){
-                    katZDocelowy[i] = katZ[i] - 90;
+                    katZDocelowy[i] = katZ[i] + 90;
                 }
-                obroconoZ = true;
-                dodaj_kolejnosc(2);
+                obroconoZminus = true;
+                dodaj_kolejnosc(-3);
             }
             if (katZDocelowy[0] < katZ[0]){
                 for(int i = 0; i < 9; i++){
-                    katZ[i] = katZ[i] -1;
+                    katZ[i] = katZ[i] +1;
                 }
             }else if (katZDocelowy[0] == katZ[0]){
-                if(obroconoZ) obliczPolozenie(2,-1);
-                obroconoZ = false;
+                if(obroconoZminus) obliczPolozenie(2,-1);
+                obroconoZminus = false;
             }
             ////////////////////////
-            if (yplus && !obroconoY) {
+            if (yplus && !obroconoYplus) {
                 for(int i = 0; i < 9; i++){
                     katYDocelowy[i] = katY[i] + 90;
                 }
-                obroconoY = true;
+                obroconoYplus = true;
                 
-                dodaj_kolejnosc(1);
+                dodaj_kolejnosc(2);
             }
             if (katYDocelowy[0] > katY[0]){
                 for(int i = 0; i < 9; i++){
                     katY[i] = katY[i] +1;
                 }
             }else if (katYDocelowy[0] == katY[0]){
-                if(obroconoY) obliczPolozenie(1,1);
-                obroconoY = false;
+                if(obroconoYplus) obliczPolozenie(1,1);
+                obroconoYplus = false;
                 
             }
             //
-            if (yminus && !obroconoY) {
+            if (yminus && !obroconoYminus) {
                 for(int i = 0; i < 9; i++){
-                    katYDocelowy[i] = katY[i] - 90;
+                    katYDocelowy[i] = katY[i] + 90;
                 }
-                obroconoY = true;
-                dodaj_kolejnosc(1);
+                obroconoYminus = true;
+                dodaj_kolejnosc(-2);
             }
             if (katYDocelowy[0] < katY[0]){
                 for(int i = 0; i < 9; i++){
-                    katY[i] = katY[i] -1;
+                    katY[i] = katY[i] +1;
                 }
             }else if (katYDocelowy[0] == katY[0]){
-                if(obroconoY) obliczPolozenie(1,-1);
-                obroconoY = false;
+                if(obroconoYminus) obliczPolozenie(1,-1);
+                obroconoYminus = false;
             }
             ////////////////////////    
-            if (xplus && !obroconoX) {
+            if (xplus && !obroconoXplus) {
                 for(int i = 0; i < 9; i++){
                     katXDocelowy[i] = katX[i] + 90;
                 }
-                obroconoX = true;
-                dodaj_kolejnosc(0);
+                obroconoXplus = true;
+                dodaj_kolejnosc(1);
             }
             if (katXDocelowy[0] > katX[0]){
                 for(int i = 0; i < 9; i++){
                     katX[i] = katX[i] +1;
                 }
             }else if (katXDocelowy[0] == katX[0]){
-                if(obroconoX) obliczPolozenie(0,1);
-                obroconoX = false;
+                if(obroconoXplus) obliczPolozenie(0,1);
+                obroconoXplus = false;
             }
             //
-            if (xminus && !obroconoX) {
+            if (xminus && !obroconoXminus) {
                 for(int i = 0; i < 9; i++){
-                    katXDocelowy[i] = katX[i] - 90;
+                    katXDocelowy[i] = katX[i] + 90;
                 }
-                obroconoX = true;
-                dodaj_kolejnosc(0);
+                obroconoXminus = true;
+                dodaj_kolejnosc(-1);
             }
             if (katXDocelowy[0] < katX[0]){
                 for(int i = 0; i < 9; i++){
-                    katX[i] = katX[i] -1;
+                    katX[i] = katX[i] +1;
                 }
-            }else if (katXDocelowy == katX){
-                if(obroconoX)obliczPolozenie(0,-1);
+            }else if (katXDocelowy[0] == katX[0]){
+                if(obroconoXminus){
+                    obliczPolozenie(0,-1);
+                }
                 
-                obroconoX = false;
+                obroconoXminus = false;
             }
 
         

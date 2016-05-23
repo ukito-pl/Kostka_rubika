@@ -29,6 +29,7 @@ import static javax.media.j3d.Shape3D.ALLOW_APPEARANCE_OVERRIDE_WRITE;
 import static javax.media.j3d.Shape3D.ALLOW_APPEARANCE_WRITE;
 import javax.media.j3d.Transform3D;
 import javax.media.j3d.TransformGroup;
+import javax.media.j3d.TransparencyAttributes;
 import javax.swing.JFrame;
 import javax.swing.Timer;
 import javax.vecmath.Color3f;
@@ -214,84 +215,128 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
         }
     }
     
-    public void obliczPolozenie(){
+    public void obliczPolozenie(int os,int obr){
         //zmienia wartości położenia każdego szescianu względem nieruchomego układu współrzędnych, jeszcze nie do końca działa
         for (int i = 1; i <= 26; i++){
-            Vector3f obecnePolozenie = new Vector3f();
-            obecnePolozenie.x = przesunietySzescianPolozenie[i].x;
-            obecnePolozenie.y = przesunietySzescianPolozenie[i].y;
-            obecnePolozenie.z = przesunietySzescianPolozenie[i].z;
-            
-            //wokół X
-            int ilosc_obrotow_X = (int) (przesunietySzescianKaty[i].x/90);
-            while(ilosc_obrotow_X > 3){
-                ilosc_obrotow_X -= 4;
+            for(int j = 0; j < (sciana_do_obrotu.numChildren()); j++){
+                if( szescian[i] == sciana_do_obrotu.getChild(j)){
+                    Vector3f obecnePolozenie = new Vector3f();
+                    obecnePolozenie.x = przesunietySzescianPolozenie[i].x;
+                    obecnePolozenie.y = przesunietySzescianPolozenie[i].y;
+                    obecnePolozenie.z = przesunietySzescianPolozenie[i].z;
+
+
+                    switch(os){
+                        case 0: if(obr == 1 ){
+                                    przesunietySzescianPolozenie[i].y = - obecnePolozenie.z;
+                                    przesunietySzescianPolozenie[i].z = obecnePolozenie.y;
+                                }
+                                if(obr == -1 ){
+                                    przesunietySzescianPolozenie[i].y = obecnePolozenie.z;
+                                    przesunietySzescianPolozenie[i].z = - obecnePolozenie.y;
+                                }
+                                break;
+                        case 1: if(obr == 1){
+                                    przesunietySzescianPolozenie[i].x = - obecnePolozenie.z;
+                                    przesunietySzescianPolozenie[i].z =  obecnePolozenie.x;
+                                }
+                                if(obr == -1){
+                                    przesunietySzescianPolozenie[i].x =  obecnePolozenie.z;
+                                    przesunietySzescianPolozenie[i].z = - obecnePolozenie.x;
+                                }
+                                break;
+                        case 2: if(obr == 1){
+                                    przesunietySzescianPolozenie[i].x =  obecnePolozenie.y;
+                                    przesunietySzescianPolozenie[i].y = - obecnePolozenie.x;
+                                }
+                                if(obr == -1){
+                                    przesunietySzescianPolozenie[i].x = - obecnePolozenie.y;
+                                    przesunietySzescianPolozenie[i].y =  obecnePolozenie.x;
+                                }
+                                break;      
+                        }
+                }
             }
-            while(ilosc_obrotow_X < -3){
-                ilosc_obrotow_X += 4;
-            }
-            if(ilosc_obrotow_X == 1 || ilosc_obrotow_X == -3){
-                przesunietySzescianPolozenie[i].y = - obecnePolozenie.z;
-                przesunietySzescianPolozenie[i].z = obecnePolozenie.y;
-               
-            }
-            if(ilosc_obrotow_X == 2 || ilosc_obrotow_X == -2){
-                przesunietySzescianPolozenie[i].y = - obecnePolozenie.z;
-                przesunietySzescianPolozenie[i].z = - obecnePolozenie.y;
-            }
-            if(ilosc_obrotow_X == -1 || ilosc_obrotow_X == 3){
-                przesunietySzescianPolozenie[i].y = obecnePolozenie.z;
-                przesunietySzescianPolozenie[i].z = - obecnePolozenie.y;
-            }
-            
-            //wokół Y
-            int ilosc_obrotow_Y = (int) przesunietySzescianKaty[i].y/90;
-            while(ilosc_obrotow_Y > 3){
-                ilosc_obrotow_Y -= 4;
-            }
-            while(ilosc_obrotow_Y < -3){
-                ilosc_obrotow_Y += 4;
-            }
-            if(ilosc_obrotow_Y == 1 || ilosc_obrotow_Y == -3){
-                przesunietySzescianPolozenie[i].x =  obecnePolozenie.z;
-                przesunietySzescianPolozenie[i].z = - obecnePolozenie.z;
-                
-            }
-            if(ilosc_obrotow_Y == 2 || ilosc_obrotow_Y == -2){
-                przesunietySzescianPolozenie[i].x = - obecnePolozenie.z;
-                przesunietySzescianPolozenie[i].z = - obecnePolozenie.x;
-            }
-            if(ilosc_obrotow_Y == -1 || ilosc_obrotow_Y == 3){
-                przesunietySzescianPolozenie[i].x = - obecnePolozenie.z;
-                przesunietySzescianPolozenie[i].z = obecnePolozenie.z;
-                
-            }
-            
-            //wokół Z
-            int ilosc_obrotow_Z = (int) przesunietySzescianKaty[i].z/90;
-            while(ilosc_obrotow_Z > 3){
-                ilosc_obrotow_Z -= 4;
-            }
-            while(ilosc_obrotow_Z < -3){
-                ilosc_obrotow_Z += 4;
-            }
-            if(ilosc_obrotow_Z == 1 || ilosc_obrotow_Z == -3){
-                przesunietySzescianPolozenie[i].x = - obecnePolozenie.y;
-                przesunietySzescianPolozenie[i].y = obecnePolozenie.x;
-            }
-            if(ilosc_obrotow_Z == 2 || ilosc_obrotow_Z == -2){
-                przesunietySzescianPolozenie[i].x = - obecnePolozenie.z;
-                przesunietySzescianPolozenie[i].y = - obecnePolozenie.y;
-            }
-            if(ilosc_obrotow_Z == -1 || ilosc_obrotow_Z == 3){
-                przesunietySzescianPolozenie[i].x = obecnePolozenie.y;
-                przesunietySzescianPolozenie[i].y = - obecnePolozenie.x;
-            }
-            
-            
-            
         }
     }
+            
+                        
+            
+               
+            
+            
+//            if(obr == 1 ){
+//                przesunietySzescianPolozenie[i].y = - obecnePolozenie.z;
+//                przesunietySzescianPolozenie[i].z = obecnePolozenie.y;
+//               
+//            }
+//            if(ilosc_obrotow_X == 2 || ilosc_obrotow_X == -2){
+//                przesunietySzescianPolozenie[i].y = - obecnePolozenie.y;
+//                przesunietySzescianPolozenie[i].z = - obecnePolozenie.z;
+//            }
+//            if(obr == -1 ){
+//                przesunietySzescianPolozenie[i].y = obecnePolozenie.z;
+//                przesunietySzescianPolozenie[i].z = - obecnePolozenie.y;
+//            }
+            
+            //wokół Y
+//            int ilosc_obrotow_Y;
+//            ilosc_obrotow_Y = (int) przesunietySzescianKaty[i].y;
+//            while(ilosc_obrotow_Y > 3){
+//                ilosc_obrotow_Y -= 4;
+//            }
+//            while(ilosc_obrotow_Y < -3){
+//                ilosc_obrotow_Y += 4;
+//            }
+//            if(ilosc_obrotow_Y == 0){
+//                przesunietySzescianPolozenie[i].x = obecnePolozenie.x;
+//                przesunietySzescianPolozenie[i].z = obecnePolozenie.y; 
+//            }
+//            if(ilosc_obrotow_Y == 1 || ilosc_obrotow_Y == -3){
+//                przesunietySzescianPolozenie[i].x =  obecnePolozenie.z;
+//                przesunietySzescianPolozenie[i].z = - obecnePolozenie.z;
+//                
+//            }
+//            if(ilosc_obrotow_Y == 2 || ilosc_obrotow_Y == -2){
+//                przesunietySzescianPolozenie[i].x = - obecnePolozenie.x;
+//                przesunietySzescianPolozenie[i].z = - obecnePolozenie.z;
+//            }
+//            if(ilosc_obrotow_Y == -1 || ilosc_obrotow_Y == 3){
+//                przesunietySzescianPolozenie[i].x = - obecnePolozenie.z;
+//                przesunietySzescianPolozenie[i].z = obecnePolozenie.z;
+//                
+//            }
+            
+            //wokół Z
+//            int ilosc_obrotow_Z;
+//            ilosc_obrotow_Z = (int) przesunietySzescianKaty[i].z;
+//            while(ilosc_obrotow_Z > 3){
+//                ilosc_obrotow_Z -= 4;
+//            }
+//            while(ilosc_obrotow_Z < -3){
+//                ilosc_obrotow_Z += 4;
+//            }
+//            if(ilosc_obrotow_Z == 0){
+//                przesunietySzescianPolozenie[i].y = obecnePolozenie.z;
+//                przesunietySzescianPolozenie[i].x = obecnePolozenie.x; 
+//            }
+//            if(ilosc_obrotow_Z == 1 || ilosc_obrotow_Z == -3){
+//                przesunietySzescianPolozenie[i].x = - obecnePolozenie.y;
+//                przesunietySzescianPolozenie[i].y = obecnePolozenie.x;
+//            }
+//            if(ilosc_obrotow_Z == 2 || ilosc_obrotow_Z == -2){
+//                przesunietySzescianPolozenie[i].x = - obecnePolozenie.x;
+//                przesunietySzescianPolozenie[i].y = - obecnePolozenie.y;
+//            }
+//            if(ilosc_obrotow_Z == -1 || ilosc_obrotow_Z == 3){
+//                przesunietySzescianPolozenie[i].x = obecnePolozenie.y;
+//                przesunietySzescianPolozenie[i].y = - obecnePolozenie.x;
+//            }
+            
+            
+            
+//        }
+//    }
     
    
     public TransformGroup utworzKostke(){
@@ -349,6 +394,7 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
             przesuniecie[i] = new Transform3D();
             
             szescianShape[i] = new Shape3D(szescianGeom);
+            szescianShape[i].setCapability(Shape3D.ALLOW_APPEARANCE_WRITE);
             przesunietySzescian[i] = new TransformGroup();
             przesunietySzescian[i].setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
             przesunietySzescianKaty[i] = new Vector3f(0f,0f,0f);
@@ -399,6 +445,17 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
                 sciana_do_obrotu.removeChild(szescian[i]);
                 if (przesunietySzescianPolozenie[i].x == sciana.x){
                     sciana_do_obrotu.addChild(szescian[i]);
+                    //ustawienie przezroczystosci
+                    Appearance wyglad = new Appearance(); 
+                    TransparencyAttributes transp = new TransparencyAttributes();
+                    transp.setTransparency(0.15f);
+                    transp.setTransparencyMode(3);
+                    wyglad.setTransparencyAttributes(transp);
+                    TransformGroup prz1 =(TransformGroup) szescian[i].getChild(0);
+                    TransformGroup prz2 = (TransformGroup)prz1.getChild(0);
+                    Shape3D sze = (Shape3D) prz2.getChild(0);
+                    sze.setAppearance(wyglad);
+                    
                     katX[k] = (int) przesunietySzescianKaty[i].x;
                     katY[k] = (int) przesunietySzescianKaty[i].y;
                     katZ[k] = (int) przesunietySzescianKaty[i].z;
@@ -408,6 +465,16 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
                     k++;
                 }else {
                     transformacja_kostka.addChild(szescian[i]);
+                    //zresetowanie przezroczystosci
+                    Appearance wyglad = new Appearance(); 
+                    TransparencyAttributes transp = new TransparencyAttributes();
+                    transp.setTransparency(0.15f);
+                    transp.setTransparencyMode(4);
+                    wyglad.setTransparencyAttributes(transp);
+                    TransformGroup prz1 =(TransformGroup) szescian[i].getChild(0);
+                    TransformGroup prz2 = (TransformGroup)prz1.getChild(0);
+                    Shape3D sze = (Shape3D) prz2.getChild(0);
+                    sze.setAppearance(wyglad);
 
                 }
             }
@@ -419,6 +486,17 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
                 sciana_do_obrotu.removeChild(szescian[i]);
                 if (przesunietySzescianPolozenie[i].y == sciana.y){
                     sciana_do_obrotu.addChild(szescian[i]);
+                    //ustawienie przezroczystosci
+                    Appearance wyglad = new Appearance(); 
+                    TransparencyAttributes transp = new TransparencyAttributes();
+                    transp.setTransparency(0.15f);
+                    transp.setTransparencyMode(3);
+                    wyglad.setTransparencyAttributes(transp);
+                    TransformGroup prz1 =(TransformGroup) szescian[i].getChild(0);
+                    TransformGroup prz2 = (TransformGroup)prz1.getChild(0);
+                    Shape3D sze = (Shape3D) prz2.getChild(0);
+                    sze.setAppearance(wyglad);
+                    
                     katX[k] = (int) przesunietySzescianKaty[i].x;
                     katY[k] = (int) przesunietySzescianKaty[i].y;
                     katZ[k] = (int) przesunietySzescianKaty[i].z;
@@ -428,6 +506,16 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
                     k++;
                 }else {
                     transformacja_kostka.addChild(szescian[i]);
+                    //zresetowanie przezroczystosci
+                    Appearance wyglad = new Appearance(); 
+                    TransparencyAttributes transp = new TransparencyAttributes();
+                    transp.setTransparency(0.15f);
+                    transp.setTransparencyMode(4);
+                    wyglad.setTransparencyAttributes(transp);
+                    TransformGroup prz1 =(TransformGroup) szescian[i].getChild(0);
+                    TransformGroup prz2 = (TransformGroup)prz1.getChild(0);
+                    Shape3D sze = (Shape3D) prz2.getChild(0);
+                    sze.setAppearance(wyglad);
 
                 }
             }
@@ -439,6 +527,17 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
                 sciana_do_obrotu.removeChild(szescian[i]);
                 if (przesunietySzescianPolozenie[i].z == sciana.z){
                     sciana_do_obrotu.addChild(szescian[i]);
+                    //ustawienie przezroczystosci
+                    Appearance wyglad = new Appearance(); 
+                    TransparencyAttributes transp = new TransparencyAttributes();
+                    transp.setTransparency(0.15f);
+                    transp.setTransparencyMode(3);
+                    wyglad.setTransparencyAttributes(transp);
+                    TransformGroup prz1 =(TransformGroup) szescian[i].getChild(0);
+                    TransformGroup prz2 = (TransformGroup)prz1.getChild(0);
+                    Shape3D sze = (Shape3D) prz2.getChild(0);
+                    sze.setAppearance(wyglad);
+                    
                     katX[k] = (int) przesunietySzescianKaty[i].x;
                     katY[k] = (int) przesunietySzescianKaty[i].y;
                     katZ[k] = (int) przesunietySzescianKaty[i].z;
@@ -448,6 +547,16 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
                     k++;
                 }else {
                     transformacja_kostka.addChild(szescian[i]);
+                    //zresetowanie przezroczystosci
+                    Appearance wyglad = new Appearance(); 
+                    TransparencyAttributes transp = new TransparencyAttributes();
+                    transp.setTransparency(0.15f);
+                    transp.setTransparencyMode(4);
+                    wyglad.setTransparencyAttributes(transp);
+                    TransformGroup prz1 =(TransformGroup) szescian[i].getChild(0);
+                    TransformGroup prz2 = (TransformGroup)prz1.getChild(0);
+                    Shape3D sze = (Shape3D) prz2.getChild(0);
+                    sze.setAppearance(wyglad);
 
                 }
             }
@@ -615,7 +724,7 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
                     katZ[i] = katZ[i] +1;
                 }
             }else if (katZDocelowy[0] == katZ[0]){
-                if(obroconoZ) obliczPolozenie();
+                if(obroconoZ) obliczPolozenie(2,1);
                 obroconoZ = false;
                 
             }
@@ -632,7 +741,7 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
                     katZ[i] = katZ[i] -1;
                 }
             }else if (katZDocelowy[0] == katZ[0]){
-                if(obroconoZ) obliczPolozenie();
+                if(obroconoZ) obliczPolozenie(2,-1);
                 obroconoZ = false;
             }
             ////////////////////////
@@ -649,7 +758,7 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
                     katY[i] = katY[i] +1;
                 }
             }else if (katYDocelowy[0] == katY[0]){
-                if(obroconoY) obliczPolozenie();
+                if(obroconoY) obliczPolozenie(1,1);
                 obroconoY = false;
                 
             }
@@ -666,7 +775,7 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
                     katY[i] = katY[i] -1;
                 }
             }else if (katYDocelowy[0] == katY[0]){
-                if(obroconoY) obliczPolozenie();
+                if(obroconoY) obliczPolozenie(1,-1);
                 obroconoY = false;
             }
             ////////////////////////    
@@ -682,7 +791,7 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
                     katX[i] = katX[i] +1;
                 }
             }else if (katXDocelowy[0] == katX[0]){
-                if(obroconoX) obliczPolozenie();
+                if(obroconoX) obliczPolozenie(0,1);
                 obroconoX = false;
             }
             //
@@ -698,7 +807,7 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
                     katX[i] = katX[i] -1;
                 }
             }else if (katXDocelowy == katX){
-                if(obroconoX)obliczPolozenie();
+                if(obroconoX)obliczPolozenie(0,-1);
                 
                 obroconoX = false;
             }

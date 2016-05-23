@@ -239,20 +239,32 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
         
         Transform3D  p_kostki   = new Transform3D();
         //tutaj wykonują się rotacje w odpowidniej kolejnosci
+        int obrocono_X = ilosc_obrotowX[i][j][k] - 1;
+        int obrocono_Y = ilosc_obrotowY[i][j][k] - 1;
+        int obrocono_Z = ilosc_obrotowZ[i][j][k] - 1;
+        int kat_X = katX[i][j][k];
+        int kat_Y = katY[i][j][k];
+        int kat_Z = katZ[i][j][k];
+        
         for(int a = 1; a <= ilosc_obrotow[i][j][k]; a++){
-            
             switch(kolejnosc[a][i][j][k]){
                 case 0: Transform3D  tmp_rotX      = new Transform3D();
                         
-                        tmp_rotX.rotX(PI/180*(katX[i][j][k])/ilosc_obrotowX[i][j][k]);
+                        tmp_rotX.rotX(PI/180*(kat_X - 90*obrocono_X));
+                        kat_X = 90*obrocono_X;
+                        obrocono_X--;
                         p_kostki.mul(tmp_rotX);
                         break;
                 case 1: Transform3D  tmp_rotY      = new Transform3D();
-                        tmp_rotY.rotY(PI/180*(katY[i][j][k])/ilosc_obrotowY[i][j][k]);      
+                        tmp_rotY.rotY(PI/180*(kat_Y - 90*obrocono_Y));
+                        kat_Y = 90*obrocono_Y;
+                        obrocono_Y--;
                         p_kostki.mul(tmp_rotY);
                         break;
                 case 2: Transform3D  tmp_rotZ      = new Transform3D();
-                        tmp_rotZ.rotZ(PI/180*(katZ[i][j][k])/ilosc_obrotowZ[i][j][k]);
+                        tmp_rotZ.rotZ(PI/180*(kat_Z - 90*obrocono_Z));
+                        kat_Z = 90*obrocono_Z;
+                        obrocono_Z--;
                         p_kostki.mul(tmp_rotZ);
                         break;
             }

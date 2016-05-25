@@ -18,6 +18,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import static java.lang.Math.PI;
+import java.util.Random;
 import javax.media.j3d.AmbientLight;
 import javax.media.j3d.Appearance;
 import javax.media.j3d.BoundingSphere;
@@ -48,7 +49,8 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
     int katXDocelowy[];//przechowują docelowe kąty aktualnych sześcianów podpiętych do ściany obrotowej
     int katYDocelowy[];//
     int katZDocelowy[];//
-    int kolejnosc[][];  //przechowuje kolejnosć obrotów o 90 stopni wokół określonych osi przy czym znak + oznacz obrót dodatni, a znak - obrót ujemny, 1 - oś X, 2 - oś Y, 3 - oś Z
+    int kolejnosc[][];  //przechowuje kolejnosć obrotów o 90 stopni wokół określonych osi przy czym znak + oznacz obrót dodatni, a znak - obrót ujemny,
+                        //1 - oś X, 2 - oś Y, 3 - oś Z, pierwszy element jest pusty
     int liczba_obrotow[];//liczba wykonanych obrotów każdego szesciana, liczba ta aktualizuje się po rozpoczęciu każdego obrotu
     int liczba_obrotowX[];
     int liczba_obrotowY[];
@@ -513,7 +515,62 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
         xminus = false;
         xplus = false;
     }
-
+    
+    public void losuj_ulozenie(){
+        Random generator = new Random();
+        for(int i = 1; i < 15; i++){
+            int losowa1 = generator.nextInt(6);
+            int losowa2 = generator.nextInt(2);
+            losowa2 = -1*losowa2 + -1*(losowa2-1);
+            switch(losowa1){
+                case 0:     zmien_sciane_do_obrotu(1);
+                            for(int k = 0; k< 9; k++){
+                                katX[k] = katX[k] + 90;
+                            }
+                            dodaj_kolejnosc(losowa2);
+                            obliczPolozenie(losowa2);
+                            break;
+                case 1:     zmien_sciane_do_obrotu(2);
+                            for(int k = 0; k< 9; k++){
+                                katX[k] = katX[k] + 90;
+                            }
+                            dodaj_kolejnosc(losowa2);
+                            obliczPolozenie(losowa2);
+                            break;
+                case 2:     zmien_sciane_do_obrotu(3);
+                            for(int k = 0; k< 9; k++){
+                                katY[k] = katY[k] + 90;
+                            }
+                            dodaj_kolejnosc(2*losowa2);
+                            obliczPolozenie(2*losowa2);
+                            break;
+                case 3:     zmien_sciane_do_obrotu(4); 
+                            for(int k = 0; k< 9; k++){
+                                katY[k] = katY[k] + 90;
+                            }
+                            dodaj_kolejnosc(-2*losowa2);
+                            obliczPolozenie(-2*losowa2);
+                            break;     
+                case 4:     zmien_sciane_do_obrotu(5);
+                            for(int k = 0; k< 9; k++){
+                                katZ[k] = katZ[k] + 90;
+                            }
+                            dodaj_kolejnosc(3*losowa2);
+                            obliczPolozenie(3*losowa2);
+                            break;
+                case 5:     zmien_sciane_do_obrotu(6); 
+                            for(int k = 0; k< 9; k++){
+                                katZ[k] = katZ[k] + 90;
+                            }
+                            dodaj_kolejnosc(-3*losowa2);
+                            obliczPolozenie(-3*losowa2);
+                            break; 
+            }
+            obrot();
+           
+        }
+    }
+    
     public static void main(String[] args) {
         
         new Kostka_rubika();
@@ -556,6 +613,7 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
                     case KeyEvent.VK_4:     zmien_sciane_do_obrotu(4); break;     
                     case KeyEvent.VK_5:     zmien_sciane_do_obrotu(5); break;
                     case KeyEvent.VK_6:     zmien_sciane_do_obrotu(6); break;
+                    case KeyEvent.VK_SPACE: losuj_ulozenie();
                     case KeyEvent.VK_RIGHT: resetuj(); break; 
                     case KeyEvent.VK_LEFT:  resetuj(); break;
                     

@@ -7,12 +7,17 @@ package kostka_rubika;
 import static java.lang.Math.*;
 
 import com.sun.j3d.utils.behaviors.vp.OrbitBehavior;
+import com.sun.j3d.utils.geometry.Box;
 import com.sun.j3d.utils.geometry.ColorCube;
+import com.sun.j3d.utils.geometry.Primitive;
+import com.sun.j3d.utils.image.TextureLoader;
 import com.sun.j3d.utils.universe.SimpleUniverse;
 
 import com.sun.prism.paint.Color;
 import java.awt.Dimension;
 import java.awt.GraphicsConfiguration;
+
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -21,17 +26,22 @@ import static java.lang.Math.PI;
 import java.util.Random;
 import javax.media.j3d.AmbientLight;
 import javax.media.j3d.Appearance;
+import javax.media.j3d.Background;
 import javax.media.j3d.BoundingSphere;
 import javax.media.j3d.BranchGroup;
 import javax.media.j3d.Canvas3D;
 import javax.media.j3d.ColoringAttributes;
+import javax.media.j3d.ImageComponent2D;
 import javax.media.j3d.QuadArray;
 import javax.media.j3d.Shape3D;
 import static javax.media.j3d.Shape3D.ALLOW_APPEARANCE_OVERRIDE_WRITE;
 import static javax.media.j3d.Shape3D.ALLOW_APPEARANCE_WRITE;
+import javax.media.j3d.Texture;
+import javax.media.j3d.Texture2D;
 import javax.media.j3d.Transform3D;
 import javax.media.j3d.TransformGroup;
 import javax.media.j3d.TransparencyAttributes;
+import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.Timer;
 import javax.vecmath.Color3f;
@@ -58,7 +68,7 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
     int aktywna_sciana ;
     int memory = 1000;  //liczba możliwych ruchów do wykonania
     float a = 0.2f; //szerokość każdego małego sześcianu
-    float d = 0.002f; //odległosć między szescianami
+    float d = 0.0f; //odległosć między szescianami
     boolean zplus;  //przyjmuje wartość true gdy użytkownik chce obrócić śćianą
     boolean zminus; //
     boolean xplus;  //
@@ -73,7 +83,7 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
     boolean obroc_Xminus;   //
     //Kolejnosc podpięcia do siebie transformgroupów i branchgroupów:
     //(BG)scena <-- (TG)kostka <-- (TG)transformacja_kostka <-- (BG)szescian[] <-- (TG) przesunietySzescian[] <-- (T3D) przesuniecie[]
-    //                                                                             (TG) przesunietySzescian[] <-- (Shape3D) szescianShape[]
+    //                                                                             (TG) przesunietySzescian[] <-- (Box) szescian_Box[]
     //                                                                             (TG) przesunietySzescian[] <-- (T3D) rot_szescianu[]
     //                             (TG)transformacja_kostka <-- (TG)sciana_do_obrotu <-- (BG)szescian[] <-- ...
     TransformGroup kostka;
@@ -82,7 +92,7 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
     TransformGroup sciana_do_obrotu;
     Transform3D przesuniecie[];
     BranchGroup szescian[];
-    Shape3D szescianShape[];
+    Box szescian_Box[];
     Vector3f szescianPolozenie[]; //określa położenie każdego szesciana względem układu ustalonego
     Vector3f szescianKaty[];      //określa kąty każdego szesciana względem układu ustalonego, przy czym wartości kątów są zawsze dodatnie
     Timer tm = new Timer(5,this);
@@ -113,11 +123,14 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
         kostka = utworzKostke();
         BranchGroup scena = new BranchGroup();
         scena.addChild(kostka);
+        
+        Background tlo = new Background(new Color3f(0.9f,0.9f,0.9f));
+        tlo.setApplicationBounds(new BoundingSphere());
+        scena.addChild(tlo);
+        
         scena.setCapability(BranchGroup.ALLOW_DETACH);
         scena.compile();
-        
-        
-            
+              
         SimpleUniverse simpleU = new SimpleUniverse(canvas3D);
 
         Transform3D przesuniecie_obserwatora = new Transform3D();
@@ -132,6 +145,9 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
         simpleU.getCanvas().addKeyListener(this);  
         
         simpleU.addBranchGraph(scena);
+        
+        ImageIcon img = new ImageIcon("tekstury/Kostka_rubika_icon.png");
+        setIconImage(img.getImage());
     }
     
     public TransformGroup utworzKostke(){
@@ -143,30 +159,8 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
         transformacja_kostka.setCapability(TransformGroup.ALLOW_CHILDREN_READ);
         transformacja_kostka.setCapability(TransformGroup.ALLOW_CHILDREN_EXTEND);
         
-        ColorCube cc = new ColorCube(a/2);
-        QuadArray szescianGeom = new QuadArray(24, QuadArray.COORDINATES
-                | QuadArray.COLOR_4);
-        szescianGeom = (QuadArray) cc.getGeometry();
-        for(int i = 0; i <= 3; i++){
-            szescianGeom.setColor(i, new Color3f(1,1,1));
-        }
-        for(int i = 4; i <= 7; i++){
-            szescianGeom.setColor(i, new Color3f(0,1,0));
-        }
-        for(int i = 8; i <= 11; i++){
-            szescianGeom.setColor(i, new Color3f(1,0,0));
-        }
-        for(int i = 12; i <= 15; i++){
-            szescianGeom.setColor(i, new Color3f(0,0,1));
-        }
-        for(int i = 16; i <= 19; i++){
-            szescianGeom.setColor(i, new Color3f(1,1,0));
-        }
-        for(int i = 20; i <= 23; i++){
-            szescianGeom.setColor(i, new Color3f(1,0.6f,0));
-        }
         
-        szescianShape = new Shape3D[27];
+        szescian_Box= new Box[27];
 
         szescian_tg = new TransformGroup[27];
         szescianPolozenie = new Vector3f[27];
@@ -176,17 +170,42 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
         szescian = new BranchGroup[27];
         przesuniecie = new Transform3D[27];
         
+        Appearance wyglad = new Appearance();
+        
         for(int i=0; i <= 26; i++){
-           
             przesuniecie[i] = new Transform3D();
             
-            szescianShape[i] = new Shape3D(szescianGeom);
-            szescianShape[i].setCapability(Shape3D.ALLOW_APPEARANCE_WRITE);
+            szescian_Box[i] = new Box(a/2,a/2,a/2,Primitive.GENERATE_TEXTURE_COORDS, wyglad);
+            szescian_Box[i].setCapability(Shape3D.ALLOW_APPEARANCE_WRITE);
+            Appearance wyglad_sciany1 = new Appearance();
+            wyglad_sciany1.setCapability(Appearance.ALLOW_TRANSPARENCY_ATTRIBUTES_WRITE);
+            wyglad_sciany1.setTexture(zaladuj_teksture("tekstury/sciana1.png"));
+            szescian_Box[i].setAppearance(Box.BACK, wyglad_sciany1);
+            Appearance wyglad_sciany2 = new Appearance();
+            wyglad_sciany2.setCapability(Appearance.ALLOW_TRANSPARENCY_ATTRIBUTES_WRITE);
+            wyglad_sciany2.setTexture(zaladuj_teksture("tekstury/sciana2.png"));
+            szescian_Box[i].setAppearance(Box.TOP, wyglad_sciany2);
+            Appearance wyglad_sciany3 = new Appearance();
+            wyglad_sciany3.setCapability(Appearance.ALLOW_TRANSPARENCY_ATTRIBUTES_WRITE);
+            wyglad_sciany3.setTexture(zaladuj_teksture("tekstury/sciana3.png"));
+            szescian_Box[i].setAppearance(Box.FRONT, wyglad_sciany3);
+            Appearance wyglad_sciany4 = new Appearance();
+            wyglad_sciany4.setCapability(Appearance.ALLOW_TRANSPARENCY_ATTRIBUTES_WRITE);
+            wyglad_sciany4.setTexture(zaladuj_teksture("tekstury/sciana4.png"));
+            szescian_Box[i].setAppearance(Box.BOTTOM, wyglad_sciany4);
+            Appearance wyglad_sciany5 = new Appearance();
+            wyglad_sciany5.setCapability(Appearance.ALLOW_TRANSPARENCY_ATTRIBUTES_WRITE);
+            wyglad_sciany5.setTexture(zaladuj_teksture("tekstury/sciana5.png"));
+            szescian_Box[i].setAppearance(Box.LEFT, wyglad_sciany5);
+            Appearance wyglad_sciany6 = new Appearance();
+            wyglad_sciany6.setCapability(Appearance.ALLOW_TRANSPARENCY_ATTRIBUTES_WRITE);
+            wyglad_sciany6.setTexture(zaladuj_teksture("tekstury/sciana6.png"));
+            szescian_Box[i].setAppearance(Box.RIGHT, wyglad_sciany6);
             
             szescian_tg[i] = new TransformGroup();
             szescian_tg[i].setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
             
-            szescian_tg[i].addChild(dodajSzescian(szescianShape[i], i));
+            szescian_tg[i].addChild(dodajSzescian(szescian_Box[i], i));
             szescian[i] = new BranchGroup();
             szescian[i].setCapability(BranchGroup.ALLOW_DETACH);
             szescian[i].addChild(szescian_tg[i]);
@@ -209,7 +228,7 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
         return transformacja_kostka;
     }
     
-    public TransformGroup dodajSzescian(Shape3D szescian, int i){
+    public TransformGroup dodajSzescian(Box szescian, int i){
         
         
         przesuniecie[i].set(szescianPolozenie[i]);
@@ -244,6 +263,17 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
         obroc_Zminus = false;
         obroc_Yminus = false;
         obroc_Xminus = false;
+    }
+    
+    public Texture2D zaladuj_teksture(String sciezka){
+        TextureLoader loader1 = new TextureLoader(sciezka,this);
+        ImageComponent2D image = loader1.getImage();
+        Texture2D tekstura = new Texture2D(Texture.BASE_LEVEL, Texture.RGBA,
+                                        image.getWidth(), image.getHeight());
+        tekstura.setImage(0, image);
+        tekstura.setBoundaryModeS(Texture.CLAMP);
+        tekstura.setBoundaryModeT(Texture.CLAMP);
+        return tekstura;
     }
     
     public void obrot(){
@@ -401,15 +431,26 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
     }
     
     public void ustaw_przezroczystosc(int ustaw, int i){
-        Appearance wyglad = new Appearance(); 
+        //Appearance wyglad = new Appearance(); 
         TransparencyAttributes transp = new TransparencyAttributes();
         transp.setTransparency(0.15f * ustaw);
         transp.setTransparencyMode(3);
-        wyglad.setTransparencyAttributes(transp);
+        //wyglad.setTransparencyAttributes(transp);
         TransformGroup prz1 =(TransformGroup) szescian[i].getChild(0);
         TransformGroup prz2 = (TransformGroup)prz1.getChild(0);
-        Shape3D sze = (Shape3D) prz2.getChild(0);
-        sze.setAppearance(wyglad);
+        Box box = (Box) prz2.getChild(0);
+        Appearance app1 = box.getAppearance(Box.LEFT);
+        app1.setTransparencyAttributes(transp);
+        Appearance app2 = box.getAppearance(Box.RIGHT);
+        app2.setTransparencyAttributes(transp);
+        Appearance app3 = box.getAppearance(Box.TOP);
+        app3.setTransparencyAttributes(transp);
+        Appearance app4 = box.getAppearance(Box.BOTTOM);
+        app4.setTransparencyAttributes(transp);
+        Appearance app5 = box.getAppearance(Box.FRONT);
+        app5.setTransparencyAttributes(transp);
+        Appearance app6 = box.getAppearance(Box.BACK);
+        app6.setTransparencyAttributes(transp);
     }
     
     public boolean obraca_sie(){

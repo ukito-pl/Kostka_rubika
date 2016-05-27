@@ -4,38 +4,27 @@
  * and open the template in the editor.
  */
 package kostka_rubika;
-import static java.lang.Math.*;
 
 import com.sun.j3d.utils.behaviors.vp.OrbitBehavior;
 import com.sun.j3d.utils.geometry.Box;
-import com.sun.j3d.utils.geometry.ColorCube;
 import com.sun.j3d.utils.geometry.Primitive;
 import com.sun.j3d.utils.image.TextureLoader;
 import com.sun.j3d.utils.universe.SimpleUniverse;
-
-import com.sun.prism.paint.Color;
 import java.awt.Dimension;
 import java.awt.GraphicsConfiguration;
-
-
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import static java.lang.Math.PI;
 import java.util.Random;
-import javax.media.j3d.AmbientLight;
 import javax.media.j3d.Appearance;
 import javax.media.j3d.Background;
 import javax.media.j3d.BoundingSphere;
 import javax.media.j3d.BranchGroup;
 import javax.media.j3d.Canvas3D;
-import javax.media.j3d.ColoringAttributes;
 import javax.media.j3d.ImageComponent2D;
-import javax.media.j3d.QuadArray;
 import javax.media.j3d.Shape3D;
-import static javax.media.j3d.Shape3D.ALLOW_APPEARANCE_OVERRIDE_WRITE;
-import static javax.media.j3d.Shape3D.ALLOW_APPEARANCE_WRITE;
 import javax.media.j3d.Texture;
 import javax.media.j3d.Texture2D;
 import javax.media.j3d.Transform3D;
@@ -43,6 +32,7 @@ import javax.media.j3d.TransformGroup;
 import javax.media.j3d.TransparencyAttributes;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.Timer;
 import javax.vecmath.Color3f;
 import javax.vecmath.Vector3f;
@@ -75,12 +65,14 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
     boolean xminus; //
     boolean yplus;  //
     boolean yminus; //
-    boolean obroc_Zplus;    //przyjmuuje wartosc trye gdy wykonywany jest obrót
+    boolean obroc_Zplus;    //przyjmuuje wartosc true gdy wykonywany jest obrót
     boolean obroc_Yplus;    //
     boolean obroc_Xplus;    //
     boolean obroc_Zminus;   //
     boolean obroc_Yminus;   //
     boolean obroc_Xminus;   //
+    boolean koniec;
+    boolean wyswietlono;
     //Kolejnosc podpięcia do siebie transformgroupów i branchgroupów:
     //(BG)scena <-- (TG)kostka <-- (TG)transformacja_kostka <-- (BG)szescian[] <-- (TG) przesunietySzescian[] <-- (T3D) przesuniecie[]
     //                                                                             (TG) przesunietySzescian[] <-- (Box) szescian_Box[]
@@ -94,6 +86,7 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
     BranchGroup szescian[];
     Box szescian_Box[];
     Vector3f szescianPolozenie[]; //określa położenie każdego szesciana względem układu ustalonego
+    Vector3f szescianStartowyPolozenie[];
     Vector3f szescianKaty[];      //określa kąty każdego szesciana względem układu ustalonego, przy czym wartości kątów są zawsze dodatnie
     Timer tm = new Timer(5,this);
     
@@ -165,6 +158,7 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
         szescian_tg = new TransformGroup[27];
         szescianPolozenie = new Vector3f[27];
         szescianKaty = new Vector3f[27];
+        szescianStartowyPolozenie = new Vector3f[27];
         ustaw_polozenie_pocz_szescianow();
         
         szescian = new BranchGroup[27];
@@ -270,6 +264,8 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
         obroc_Zminus = false;
         obroc_Yminus = false;
         obroc_Xminus = false;
+        koniec = false;
+        wyswietlono = true;
     }
     
     public Texture2D zaladuj_teksture(String sciezka){
@@ -338,19 +334,15 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
                                     rot_szescianu.mul(tmp_rotZminus);
                                     break;
                         }
-                    }
-                    
+                    }                    
                     szescian_tg[i].setTransform(rot_szescianu);
                     szescianKaty[i].x = katX[k];
                     szescianKaty[i].y = katY[k];
                     szescianKaty[i].z = katZ[k];
                     k++;
                 }
-            }
-                
-        }
-        
-        
+            }               
+        }             
     }
     
     public void dodaj_kolejnosc(int os){
@@ -428,14 +420,37 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
                     for (int k = -1; k<= 1; k++){
                         if(ind < szescianPolozenie.length){
                         szescianPolozenie[ind] = new Vector3f((a+d)*i,(a+d)*j,(a+d)*k);
+                        szescianStartowyPolozenie[ind] = new Vector3f((a+d)*i,(a+d)*j,(a+d)*k); 
                         szescianKaty[ind] = new Vector3f(0,0,0);
                         ind++;
                         }
                     }
-                }
-                    
+                }                   
             }
         
+    }
+    
+    public boolean ulozona(){
+        int ind  = 0;
+        
+            for(int i = -1; i <=1; i++){
+                for (int j = -1; j <= 1; j++){
+                    for (int k = -1; k<= 1; k++){
+                        if(ind < szescianPolozenie.length){                                 
+                        if (szescianPolozenie[ind].x == szescianStartowyPolozenie[ind].x &&
+                            szescianPolozenie[ind].y == szescianStartowyPolozenie[ind].y &&
+                            szescianPolozenie[ind].z == szescianStartowyPolozenie[ind].z   ) koniec = true;
+                        else {
+                            koniec = false; 
+                            i=2; j=2; k=2;
+                            wyswietlono = false;
+                        }
+                        ind++;
+                        }
+                    }
+                }                   
+            }
+        return koniec; 
     }
     
     public void ustaw_przezroczystosc(int ustaw, int i){
@@ -464,7 +479,8 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
     public boolean obraca_sie(){
         if(obroc_Zplus || obroc_Zminus || obroc_Yplus || obroc_Yminus || obroc_Xplus || obroc_Xminus){
             return true;
-        }else return false;
+        }
+        else return false;
         
     }
     
@@ -530,7 +546,6 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
                 }
             }   
         }
-
     }
     
     
@@ -615,9 +630,8 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
                             obliczPolozenie(-3*losowa2);
                             break; 
             }
-            obrot();
-           
-        }
+            obrot();           
+        }wyswietlono = false;
     }
     
     public static void main(String[] args) {
@@ -639,7 +653,7 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
                             if (aktywna_sciana == 1 || aktywna_sciana == 2)     xminus = true;
                             else if(aktywna_sciana == 3 || aktywna_sciana == 4) yminus = true;
                             else if(aktywna_sciana == 5 || aktywna_sciana == 6) zminus = true;
-                        }
+                        }                       
                         break; 
                     }
                     case KeyEvent.VK_LEFT:  
@@ -682,6 +696,10 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
             obroc_Xminus = sprawdz_czy_obrocic(xminus,obroc_Xminus,katX,katXDocelowy, -1);
 
             obrot();
+            if(ulozona() && !wyswietlono){
+                JOptionPane.showMessageDialog(null, "Gratulacje ułożyłeś kostkę rubika"); 
+                wyswietlono = true;
+            }
         }
         catch(java.lang.NullPointerException b){
         }

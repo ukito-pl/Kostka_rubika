@@ -171,6 +171,13 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
         przesuniecie = new Transform3D[27];
         
         Appearance wyglad = new Appearance();
+        Texture2D sciana1 = zaladuj_teksture("tekstury/sciana1.png");
+        Texture2D sciana2 = zaladuj_teksture("tekstury/sciana2.png");
+        Texture2D sciana3 = zaladuj_teksture("tekstury/sciana3.png");
+        Texture2D sciana4 = zaladuj_teksture("tekstury/sciana4.png");
+        Texture2D sciana5 = zaladuj_teksture("tekstury/sciana5.png");
+        Texture2D sciana6 = zaladuj_teksture("tekstury/sciana6.png");
+
         
         for(int i=0; i <= 26; i++){
             przesuniecie[i] = new Transform3D();
@@ -179,27 +186,27 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
             szescian_Box[i].setCapability(Shape3D.ALLOW_APPEARANCE_WRITE);
             Appearance wyglad_sciany1 = new Appearance();
             wyglad_sciany1.setCapability(Appearance.ALLOW_TRANSPARENCY_ATTRIBUTES_WRITE);
-            wyglad_sciany1.setTexture(zaladuj_teksture("tekstury/sciana1.png"));
+            wyglad_sciany1.setTexture(sciana1);
             szescian_Box[i].setAppearance(Box.BACK, wyglad_sciany1);
             Appearance wyglad_sciany2 = new Appearance();
             wyglad_sciany2.setCapability(Appearance.ALLOW_TRANSPARENCY_ATTRIBUTES_WRITE);
-            wyglad_sciany2.setTexture(zaladuj_teksture("tekstury/sciana2.png"));
+            wyglad_sciany2.setTexture(sciana2);
             szescian_Box[i].setAppearance(Box.TOP, wyglad_sciany2);
             Appearance wyglad_sciany3 = new Appearance();
             wyglad_sciany3.setCapability(Appearance.ALLOW_TRANSPARENCY_ATTRIBUTES_WRITE);
-            wyglad_sciany3.setTexture(zaladuj_teksture("tekstury/sciana3.png"));
+            wyglad_sciany3.setTexture(sciana3);
             szescian_Box[i].setAppearance(Box.FRONT, wyglad_sciany3);
             Appearance wyglad_sciany4 = new Appearance();
             wyglad_sciany4.setCapability(Appearance.ALLOW_TRANSPARENCY_ATTRIBUTES_WRITE);
-            wyglad_sciany4.setTexture(zaladuj_teksture("tekstury/sciana4.png"));
+            wyglad_sciany4.setTexture(sciana4);
             szescian_Box[i].setAppearance(Box.BOTTOM, wyglad_sciany4);
             Appearance wyglad_sciany5 = new Appearance();
             wyglad_sciany5.setCapability(Appearance.ALLOW_TRANSPARENCY_ATTRIBUTES_WRITE);
-            wyglad_sciany5.setTexture(zaladuj_teksture("tekstury/sciana5.png"));
+            wyglad_sciany5.setTexture(sciana5);
             szescian_Box[i].setAppearance(Box.LEFT, wyglad_sciany5);
             Appearance wyglad_sciany6 = new Appearance();
             wyglad_sciany6.setCapability(Appearance.ALLOW_TRANSPARENCY_ATTRIBUTES_WRITE);
-            wyglad_sciany6.setTexture(zaladuj_teksture("tekstury/sciana6.png"));
+            wyglad_sciany6.setTexture(sciana6);
             szescian_Box[i].setAppearance(Box.RIGHT, wyglad_sciany6);
             
             szescian_tg[i] = new TransformGroup();
@@ -271,8 +278,9 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
         Texture2D tekstura = new Texture2D(Texture.BASE_LEVEL, Texture.RGBA,
                                         image.getWidth(), image.getHeight());
         tekstura.setImage(0, image);
-        tekstura.setBoundaryModeS(Texture.CLAMP);
-        tekstura.setBoundaryModeT(Texture.CLAMP);
+        tekstura.setBoundaryModeS(Texture.WRAP);
+        tekstura.setBoundaryModeT(Texture.WRAP);
+        
         return tekstura;
     }
     
@@ -627,19 +635,20 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
         switch(e.getKeyCode()){
                     case KeyEvent.VK_RIGHT:  
                     {
-                        
-                        if (aktywna_sciana == 1 || aktywna_sciana == 2)     xminus = true;
-                        else if(aktywna_sciana == 3 || aktywna_sciana == 4) yminus = true;
-                        else if(aktywna_sciana == 5 || aktywna_sciana == 6) zminus = true;
+                        if(!obraca_sie()){
+                            if (aktywna_sciana == 1 || aktywna_sciana == 2)     xminus = true;
+                            else if(aktywna_sciana == 3 || aktywna_sciana == 4) yminus = true;
+                            else if(aktywna_sciana == 5 || aktywna_sciana == 6) zminus = true;
+                        }
                         break; 
                     }
                     case KeyEvent.VK_LEFT:  
                     {
-                        
-                        if (aktywna_sciana == 1 || aktywna_sciana == 2) xplus = true;
-                        else if(aktywna_sciana == 3 || aktywna_sciana == 4) yplus = true;
-                        else if(aktywna_sciana == 5 || aktywna_sciana == 6) zplus = true;
-                        
+                        if(!obraca_sie()){
+                            if (aktywna_sciana == 1 || aktywna_sciana == 2) xplus = true;
+                            else if(aktywna_sciana == 3 || aktywna_sciana == 4) yplus = true;
+                            else if(aktywna_sciana == 5 || aktywna_sciana == 6) zplus = true;
+                        }
                         break; 
                     }
         }   

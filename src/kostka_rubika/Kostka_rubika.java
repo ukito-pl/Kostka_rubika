@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package kostka_rubika;
 
 import com.sun.j3d.utils.behaviors.vp.OrbitBehavior;
@@ -10,6 +5,7 @@ import com.sun.j3d.utils.geometry.Box;
 import com.sun.j3d.utils.geometry.Primitive;
 import com.sun.j3d.utils.image.TextureLoader;
 import com.sun.j3d.utils.universe.SimpleUniverse;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GraphicsConfiguration;
 import java.awt.event.ActionEvent;
@@ -41,7 +37,7 @@ import javax.vecmath.Vector3f;
  *
  * @author Marek Buła & Jakub Dreliszak
  */
-public class Kostka_rubika extends JFrame implements  ActionListener, KeyListener{
+public class Kostka_rubika extends javax.swing.JFrame implements  ActionListener, KeyListener{
     
     int katX[];     //przechowują kąty aktualnych sześcianów podpiętych do ściany obrotowej
     int katY[];     //
@@ -72,7 +68,8 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
     boolean obroc_Yminus;   //
     boolean obroc_Xminus;   //
     boolean koniec;
-    boolean wyswietlono;
+    boolean poczatek;
+    boolean wybrano_sciane;
     //Kolejnosc podpięcia do siebie transformgroupów i branchgroupów:
     //(BG)scena <-- (TG)kostka <-- (TG)transformacja_kostka <-- (BG)szescian[] <-- (TG) przesunietySzescian[] <-- (T3D) przesuniecie[]
     //                                                                             (TG) przesunietySzescian[] <-- (Box) szescian_Box[]
@@ -88,16 +85,15 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
     Vector3f szescianPolozenie[]; //określa położenie każdego szesciana względem układu ustalonego
     Vector3f szescianStartowyPolozenie[];
     Vector3f szescianKaty[];      //określa kąty każdego szesciana względem układu ustalonego, przy czym wartości kątów są zawsze dodatnie
-    Timer tm = new Timer(5,this);
-    
-    
-   
+    Timer tm = new Timer(10,this);
+    double czas = 0;
+    boolean start_czasu = false;
+    int licznik = 0;
     
     Kostka_rubika(){
-        super("Kostka rubika");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        initComponents(); 
+        setTitle("Kostka rubika");
         tm.start();
-        
         addKeyListener(this);
         setFocusable(true);
         setFocusTraversalKeysEnabled(false);
@@ -105,11 +101,7 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
         GraphicsConfiguration config = SimpleUniverse.getPreferredConfiguration();
 
         Canvas3D canvas3D = new Canvas3D(config);
-        canvas3D.setPreferredSize(new Dimension(800,600));
-
-        add(canvas3D);
-        pack();
-        setVisible(true);
+        drawingPanel.add(canvas3D, java.awt.BorderLayout.CENTER);
         
         inicjalizacja_zmiennych();
 
@@ -123,7 +115,7 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
         
         scena.setCapability(BranchGroup.ALLOW_DETACH);
         scena.compile();
-              
+             
         SimpleUniverse simpleU = new SimpleUniverse(canvas3D);
 
         Transform3D przesuniecie_obserwatora = new Transform3D();
@@ -265,7 +257,8 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
         obroc_Yminus = false;
         obroc_Xminus = false;
         koniec = false;
-        wyswietlono = true;
+        poczatek = true;
+        wybrano_sciane = false;
     }
     
     public Texture2D zaladuj_teksture(String sciezka){
@@ -443,7 +436,7 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
                         else {
                             koniec = false; 
                             i=2; j=2; k=2;
-                            wyswietlono = false;
+                            poczatek = false;
                         }
                         ind++;
                         }
@@ -451,6 +444,12 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
                 }                   
             }
         return koniec; 
+    }
+    
+    public void stoper(){
+        czas = czas+18;
+        Stoper.setText(String.valueOf((int)czas/1000));
+        Licznik.setText(String.valueOf(licznik));
     }
     
     public void ustaw_przezroczystosc(int ustaw, int i){
@@ -631,16 +630,130 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
                             break; 
             }
             obrot();           
-        }wyswietlono = false;
+        }poczatek = false;
     }
-    
-    public static void main(String[] args) {
-        
-        new Kostka_rubika();
-    }
+          
 
     
+    @SuppressWarnings("unchecked")
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    private void initComponents() {
 
+        guiPanel = new javax.swing.JPanel();
+        jPanel1 = new javax.swing.JPanel();
+        Licznik = new javax.swing.JTextField();
+        Stoper = new javax.swing.JTextField();
+        jTextField2 = new javax.swing.JTextField();
+        jTextField3 = new javax.swing.JTextField();
+        drawingPanel = new javax.swing.JPanel();
+
+        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+
+        guiPanel.setLayout(new java.awt.GridBagLayout());
+
+        Licznik.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        Licznik.setText("0");
+        Licznik.setPreferredSize(new java.awt.Dimension(100, 30));
+
+        Stoper.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        Stoper.setText("0.0");
+        Stoper.setPreferredSize(new java.awt.Dimension(100, 30));
+
+        jTextField2.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        jTextField2.setText("Twój czas:");
+        jTextField2.setPreferredSize(new java.awt.Dimension(70, 30));
+
+        jTextField3.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        jTextField3.setText("Ilość ruchów:");
+        jTextField3.setPreferredSize(new java.awt.Dimension(70, 30));
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                .addGap(30, 30, 30)
+                .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(Stoper, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 106, Short.MAX_VALUE)
+                .addComponent(jTextField3, javax.swing.GroupLayout.PREFERRED_SIZE, 87, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(Licznik, javax.swing.GroupLayout.PREFERRED_SIZE, 64, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(31, 31, 31))
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                .addGap(0, 0, Short.MAX_VALUE)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(Licznik, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(Stoper, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jTextField3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+        );
+
+        guiPanel.add(jPanel1, new java.awt.GridBagConstraints());
+
+        drawingPanel.setPreferredSize(new java.awt.Dimension(500, 500));
+        drawingPanel.setLayout(new java.awt.BorderLayout());
+
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
+        getContentPane().setLayout(layout);
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(drawingPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 984, Short.MAX_VALUE)
+            .addComponent(guiPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        );
+        layout.setVerticalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addComponent(guiPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(drawingPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 601, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        pack();
+    }// </editor-fold>//GEN-END:initComponents
+
+    /**
+     * @param args the command line arguments
+     */
+    public static void main(String args[]) {
+        /* Set the Nimbus look and feel */
+        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
+        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
+         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
+         */
+        try {
+            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+                if ("Nimbus".equals(info.getName())) {
+                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
+                    break;
+                }
+            }
+        } catch (ClassNotFoundException ex) {
+            java.util.logging.Logger.getLogger(Kostka_rubika.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (InstantiationException ex) {
+            java.util.logging.Logger.getLogger(Kostka_rubika.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (IllegalAccessException ex) {
+            java.util.logging.Logger.getLogger(Kostka_rubika.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
+            java.util.logging.Logger.getLogger(Kostka_rubika.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        }
+        //</editor-fold>
+        //</editor-fold>
+
+        /* Create and display the form */
+        java.awt.EventQueue.invokeLater(new Runnable() {
+            public void run() {
+                new Kostka_rubika().setVisible(true);
+            }
+        });
+    }
+
+     
     @Override
     public void keyTyped(KeyEvent e) {}
 
@@ -653,7 +766,8 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
                             if (aktywna_sciana == 1 || aktywna_sciana == 2)     xminus = true;
                             else if(aktywna_sciana == 3 || aktywna_sciana == 4) yminus = true;
                             else if(aktywna_sciana == 5 || aktywna_sciana == 6) zminus = true;
-                        }                       
+                        }        
+                        if(wybrano_sciane && !obraca_sie())licznik++;
                         break; 
                     }
                     case KeyEvent.VK_LEFT:  
@@ -663,6 +777,7 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
                             else if(aktywna_sciana == 3 || aktywna_sciana == 4) yplus = true;
                             else if(aktywna_sciana == 5 || aktywna_sciana == 6) zplus = true;
                         }
+                        if(wybrano_sciane && !obraca_sie())licznik++;
                         break; 
                     }
         }   
@@ -671,12 +786,12 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
     @Override
     public void keyReleased(KeyEvent e) {
         switch(e.getKeyCode()){
-                    case KeyEvent.VK_1:     zmien_sciane_do_obrotu(1); break;
-                    case KeyEvent.VK_2:     zmien_sciane_do_obrotu(2); break;
-                    case KeyEvent.VK_3:     zmien_sciane_do_obrotu(3); break;
-                    case KeyEvent.VK_4:     zmien_sciane_do_obrotu(4); break;     
-                    case KeyEvent.VK_5:     zmien_sciane_do_obrotu(5); break;
-                    case KeyEvent.VK_6:     zmien_sciane_do_obrotu(6); break;
+                    case KeyEvent.VK_1:     zmien_sciane_do_obrotu(1); wybrano_sciane = true; break;
+                    case KeyEvent.VK_2:     zmien_sciane_do_obrotu(2); wybrano_sciane = true; break;
+                    case KeyEvent.VK_3:     zmien_sciane_do_obrotu(3); wybrano_sciane = true; break;
+                    case KeyEvent.VK_4:     zmien_sciane_do_obrotu(4); wybrano_sciane = true; break;     
+                    case KeyEvent.VK_5:     zmien_sciane_do_obrotu(5); wybrano_sciane = true; break;
+                    case KeyEvent.VK_6:     zmien_sciane_do_obrotu(6); wybrano_sciane = true; break;
                     case KeyEvent.VK_SPACE: losuj_ulozenie();
                     case KeyEvent.VK_RIGHT: resetuj(); break; 
                     case KeyEvent.VK_LEFT:  resetuj(); break;
@@ -696,12 +811,29 @@ public class Kostka_rubika extends JFrame implements  ActionListener, KeyListene
             obroc_Xminus = sprawdz_czy_obrocic(xminus,obroc_Xminus,katX,katXDocelowy, -1);
 
             obrot();
-            if(ulozona() && !wyswietlono){
-                JOptionPane.showMessageDialog(null, "Gratulacje ułożyłeś kostkę rubika"); 
-                wyswietlono = true;
+            if(ulozona() && !poczatek){
+                JOptionPane.showMessageDialog(null, "Gratulacje ułożyłeś kostkę rubika :D"); 
+                JOptionPane.showMessageDialog(null, "Jeśli chcesz zacząć jeszcze raz wybierz ścianę"); 
+                poczatek = true;
+                wybrano_sciane = false;
+                czas = 0;
+                licznik = 0;
+                Stoper.setText(String.valueOf(czas));
+                Licznik.setText(String.valueOf(licznik));
             }
+            if(wybrano_sciane)stoper();
         }
         catch(java.lang.NullPointerException b){
         }
     }
+
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JTextField Licznik;
+    private javax.swing.JTextField Stoper;
+    private javax.swing.JPanel drawingPanel;
+    private javax.swing.JPanel guiPanel;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JTextField jTextField2;
+    private javax.swing.JTextField jTextField3;
+    // End of variables declaration//GEN-END:variables
 }

@@ -87,6 +87,7 @@ public class Kostka_rubika extends javax.swing.JFrame implements  ActionListener
     Vector3f szescianKaty[];      //określa kąty każdego szesciana względem układu ustalonego, przy czym wartości kątów są zawsze dodatnie
     Timer tm = new Timer(10,this);
     double czas = 0;
+    int czas_sek = 0;
     boolean start_czasu = false;
     int licznik = 0;
     
@@ -345,6 +346,7 @@ public class Kostka_rubika extends javax.swing.JFrame implements  ActionListener
                 for(int j = 0; j < (sciana_do_obrotu.numChildren()); j++){
                     if( szescian[i] == sciana_do_obrotu.getChild(j)){
                         liczba_obrotow[i]++;
+                        Licznik.setText(String.valueOf(licznik));
                         for (int a = liczba_obrotow[i]; a > 0; a--){
                         if( a == 1){
                             switch(os){
@@ -447,9 +449,12 @@ public class Kostka_rubika extends javax.swing.JFrame implements  ActionListener
     }
     
     public void stoper(){
-        czas = czas+18;
-        Stoper.setText(String.valueOf((int)czas/1000));
-        Licznik.setText(String.valueOf(licznik));
+        czas = czas+ tm.getInitialDelay();
+        
+        czas_sek = (int) czas/1000;
+        if(czas/1000 > 0.5 + czas_sek){
+            Stoper.setText(String.valueOf((int)czas/1000));
+        }
     }
     
     public void ustaw_przezroczystosc(int ustaw, int i){
@@ -799,6 +804,8 @@ public class Kostka_rubika extends javax.swing.JFrame implements  ActionListener
         }
     }
 
+    
+    
     @Override
     public void actionPerformed(ActionEvent e) {
         try {
@@ -822,6 +829,7 @@ public class Kostka_rubika extends javax.swing.JFrame implements  ActionListener
                 Licznik.setText(String.valueOf(licznik));
             }
             if(wybrano_sciane)stoper();
+            
         }
         catch(java.lang.NullPointerException b){
         }

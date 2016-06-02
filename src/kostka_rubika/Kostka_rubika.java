@@ -27,9 +27,9 @@ import javax.media.j3d.Transform3D;
 import javax.media.j3d.TransformGroup;
 import javax.media.j3d.TransparencyAttributes;
 import javax.swing.ImageIcon;
-import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.Timer;
+import com.sun.j3d.utils.timer.J3DTimer;
 import javax.vecmath.Color3f;
 import javax.vecmath.Vector3f;
 
@@ -86,15 +86,15 @@ public class Kostka_rubika extends javax.swing.JFrame implements  ActionListener
     Vector3f szescianStartowyPolozenie[];
     Vector3f szescianKaty[];      //określa kąty każdego szesciana względem układu ustalonego, przy czym wartości kątów są zawsze dodatnie
     Timer tm = new Timer(10,this);
-    double czas = 0;
-    int czas_sek = 0;
-    boolean start_czasu = false;
+    int czas_startu = 0;
     int licznik = 0;
+    boolean start_czasu = false;
+    J3DTimer czas_nano;
     
     Kostka_rubika(){
         initComponents(); 
         setTitle("Kostka rubika");
-        tm.start();
+        tm.start();      
         addKeyListener(this);
         setFocusable(true);
         setFocusTraversalKeysEnabled(false);
@@ -447,15 +447,7 @@ public class Kostka_rubika extends javax.swing.JFrame implements  ActionListener
             }
         return koniec; 
     }
-    
-    public void stoper(){
-        czas = czas+ tm.getInitialDelay();
-        
-        czas_sek = (int) czas/1000;
-        if(czas/1000 > 0.5 + czas_sek){
-            Stoper.setText(String.valueOf((int)czas/1000));
-        }
-    }
+      
     
     public void ustaw_przezroczystosc(int ustaw, int i){
         //Appearance wyglad = new Appearance(); 
@@ -823,13 +815,15 @@ public class Kostka_rubika extends javax.swing.JFrame implements  ActionListener
                 JOptionPane.showMessageDialog(null, "Jeśli chcesz zacząć jeszcze raz wybierz ścianę"); 
                 poczatek = true;
                 wybrano_sciane = false;
-                czas = 0;
+                czas_startu = 0;
                 licznik = 0;
-                Stoper.setText(String.valueOf(czas));
+                Stoper.setText(String.valueOf(czas_startu));
                 Licznik.setText(String.valueOf(licznik));
             }
-            if(wybrano_sciane)stoper();
-            
+            if(wybrano_sciane){
+                if(czas_startu==0)czas_startu = (int)(czas_nano.getValue()/1000000000);;
+                Stoper.setText(String.valueOf((int)(czas_nano.getValue()/1000000000-czas_startu))); 
+            }
         }
         catch(java.lang.NullPointerException b){
         }

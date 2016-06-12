@@ -51,6 +51,7 @@ public class Kostka_rubika extends javax.swing.JFrame implements  ActionListener
     int liczba_obrotowX[];
     int liczba_obrotowY[];
     int liczba_obrotowZ[];
+    int kolejnosc_ruchow[];    
     int aktywna_sciana ;
     int memory = 1000;  //liczba możliwych ruchów do wykonania
     float a = 0.2f; //szerokość każdego małego sześcianu
@@ -70,6 +71,9 @@ public class Kostka_rubika extends javax.swing.JFrame implements  ActionListener
     boolean koniec;
     boolean poczatek;
     boolean wybrano_sciane;
+    boolean odtworz_ruchy = false;
+    boolean zresetowane_ruchy = false;
+    int odtwarzany_ruch = 0;
     //Kolejnosc podpięcia do siebie transformgroupów i branchgroupów:
     //(BG)scena <-- (TG)kostka <-- (TG)transformacja_kostka <-- (BG)szescian[] <-- (TG) przesunietySzescian[] <-- (T3D) przesuniecie[]
     //                                                                             (TG) przesunietySzescian[] <-- (Box) szescian_Box[]
@@ -88,6 +92,7 @@ public class Kostka_rubika extends javax.swing.JFrame implements  ActionListener
     Timer tm = new Timer(10,this);
     int czas_startu = 0;
     int licznik = 0;
+    int licznik_ruchow = 0;
     boolean start_czasu = false;
     J3DTimer czas_nano;
     
@@ -235,6 +240,7 @@ public class Kostka_rubika extends javax.swing.JFrame implements  ActionListener
     
     public void inicjalizacja_zmiennych(){
         kolejnosc = new int[memory][27];
+        kolejnosc_ruchow = new int[memory];
         liczba_obrotow= new int[27];
         liczba_obrotowX= new int[27];
         liczba_obrotowY= new int[27];
@@ -346,7 +352,7 @@ public class Kostka_rubika extends javax.swing.JFrame implements  ActionListener
                 for(int j = 0; j < (sciana_do_obrotu.numChildren()); j++){
                     if( szescian[i] == sciana_do_obrotu.getChild(j)){
                         liczba_obrotow[i]++;
-                        Licznik.setText(String.valueOf(licznik));
+                        Licznik.setText(String.valueOf(licznik_ruchow));
                         for (int a = liczba_obrotow[i]; a > 0; a--){
                         if( a == 1){
                             switch(os){
@@ -578,7 +584,7 @@ public class Kostka_rubika extends javax.swing.JFrame implements  ActionListener
     
     public void losuj_ulozenie(){
         Random generator = new Random();
-        for(int i = 1; i < 15; i++){
+        for(int i = 0; i < 14; i++){
             int losowa1 = generator.nextInt(6);
             int losowa2 = generator.nextInt(2);
             losowa2 = -1*losowa2 + -1*(losowa2-1);
@@ -587,6 +593,8 @@ public class Kostka_rubika extends javax.swing.JFrame implements  ActionListener
                             for(int k = 0; k< 9; k++){
                                 katX[k] = katX[k] + 90;
                             }
+                            kolejnosc_ruchow[licznik] = 1* losowa2;
+                            licznik++;
                             dodaj_kolejnosc(losowa2);
                             obliczPolozenie(losowa2);
                             break;
@@ -594,6 +602,8 @@ public class Kostka_rubika extends javax.swing.JFrame implements  ActionListener
                             for(int k = 0; k< 9; k++){
                                 katX[k] = katX[k] + 90;
                             }
+                            kolejnosc_ruchow[licznik] = 2* losowa2;
+                            licznik++;
                             dodaj_kolejnosc(losowa2);
                             obliczPolozenie(losowa2);
                             break;
@@ -601,6 +611,8 @@ public class Kostka_rubika extends javax.swing.JFrame implements  ActionListener
                             for(int k = 0; k< 9; k++){
                                 katY[k] = katY[k] + 90;
                             }
+                            kolejnosc_ruchow[licznik] = 3*losowa2;
+                            licznik++;
                             dodaj_kolejnosc(2*losowa2);
                             obliczPolozenie(2*losowa2);
                             break;
@@ -608,6 +620,8 @@ public class Kostka_rubika extends javax.swing.JFrame implements  ActionListener
                             for(int k = 0; k< 9; k++){
                                 katY[k] = katY[k] + 90;
                             }
+                            kolejnosc_ruchow[licznik] = 4*losowa2;
+                            licznik++;
                             dodaj_kolejnosc(-2*losowa2);
                             obliczPolozenie(-2*losowa2);
                             break;     
@@ -615,6 +629,8 @@ public class Kostka_rubika extends javax.swing.JFrame implements  ActionListener
                             for(int k = 0; k< 9; k++){
                                 katZ[k] = katZ[k] + 90;
                             }
+                            kolejnosc_ruchow[licznik] = 5*losowa2;
+                            licznik++;
                             dodaj_kolejnosc(3*losowa2);
                             obliczPolozenie(3*losowa2);
                             break;
@@ -622,15 +638,42 @@ public class Kostka_rubika extends javax.swing.JFrame implements  ActionListener
                             for(int k = 0; k< 9; k++){
                                 katZ[k] = katZ[k] + 90;
                             }
+                            kolejnosc_ruchow[licznik] = 6*losowa2;
+                            licznik++;
                             dodaj_kolejnosc(-3*losowa2);
                             obliczPolozenie(-3*losowa2);
                             break; 
             }
             obrot();           
         }poczatek = false;
+        
     }
           
+    public void resetuj_ruchy(){
+        kolejnosc = new int[memory][27];
+        liczba_obrotow= new int[27];
+        liczba_obrotowX= new int[27];
+        liczba_obrotowY= new int[27];
+        liczba_obrotowZ= new int[27];
+        katX = new int[27];
+        katY = new int[27];
+        katZ = new int[27];
+        katXDocelowy = new int[27];
+        katYDocelowy = new int[27];
+        katZDocelowy = new int[27];
+        ustaw_polozenie_pocz_szescianow();
+        poczatek = true;
+        
+        for(int i = 0; i < 27; i++){
+            
+            szescian_tg[i].setTransform(new Transform3D());
+        }
+        zmien_sciane_do_obrotu(1);
+        zresetowane_ruchy = true;
 
+        
+        
+    }
     
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
@@ -760,21 +803,37 @@ public class Kostka_rubika extends javax.swing.JFrame implements  ActionListener
                     case KeyEvent.VK_RIGHT:  
                     {
                         if(!obraca_sie()){
-                            if (aktywna_sciana == 1 || aktywna_sciana == 2)     xminus = true;
-                            else if(aktywna_sciana == 3 || aktywna_sciana == 4) yminus = true;
-                            else if(aktywna_sciana == 5 || aktywna_sciana == 6) zminus = true;
+                            switch(aktywna_sciana){
+                                case 1: kolejnosc_ruchow[licznik] = -1; xminus = true; break;
+                                case 2: kolejnosc_ruchow[licznik] = -2; xminus = true; break;
+                                case 3: kolejnosc_ruchow[licznik] = -3; yminus = true; break;
+                                case 4: kolejnosc_ruchow[licznik] = -4; yminus = true; break;
+                                case 5: kolejnosc_ruchow[licznik] = -5; zminus = true; break;
+                                case 6: kolejnosc_ruchow[licznik] = -6; zminus = true; break;
+                            }
                         }        
-                        if(wybrano_sciane && !obraca_sie())licznik++;
+                        if(wybrano_sciane && !obraca_sie()){
+                            licznik++;
+                            licznik_ruchow++;
+                        }
                         break; 
                     }
                     case KeyEvent.VK_LEFT:  
                     {
                         if(!obraca_sie()){
-                            if (aktywna_sciana == 1 || aktywna_sciana == 2) xplus = true;
-                            else if(aktywna_sciana == 3 || aktywna_sciana == 4) yplus = true;
-                            else if(aktywna_sciana == 5 || aktywna_sciana == 6) zplus = true;
+                            switch(aktywna_sciana){
+                                case 1: kolejnosc_ruchow[licznik] = 1; xplus = true; break;
+                                case 2: kolejnosc_ruchow[licznik] = 2; xplus = true; break;
+                                case 3: kolejnosc_ruchow[licznik] = 3; yplus = true; break;
+                                case 4: kolejnosc_ruchow[licznik] = 4; yplus = true; break;
+                                case 5: kolejnosc_ruchow[licznik] = 5; zplus = true; break;
+                                case 6: kolejnosc_ruchow[licznik] = 6; zplus = true; break;
+                            }
                         }
-                        if(wybrano_sciane && !obraca_sie())licznik++;
+                        if(wybrano_sciane && !obraca_sie()){
+                            licznik++;
+                            licznik_ruchow++;
+                        }
                         break; 
                     }
         }   
@@ -789,7 +848,8 @@ public class Kostka_rubika extends javax.swing.JFrame implements  ActionListener
                     case KeyEvent.VK_4:     zmien_sciane_do_obrotu(4); wybrano_sciane = true; break;     
                     case KeyEvent.VK_5:     zmien_sciane_do_obrotu(5); wybrano_sciane = true; break;
                     case KeyEvent.VK_6:     zmien_sciane_do_obrotu(6); wybrano_sciane = true; break;
-                    case KeyEvent.VK_SPACE: losuj_ulozenie();
+                    case KeyEvent.VK_R:     odtworz_ruchy = true ;break;
+                    case KeyEvent.VK_SPACE: losuj_ulozenie();break;
                     case KeyEvent.VK_RIGHT: resetuj(); break; 
                     case KeyEvent.VK_LEFT:  resetuj(); break;
                     
@@ -802,13 +862,42 @@ public class Kostka_rubika extends javax.swing.JFrame implements  ActionListener
     public void actionPerformed(ActionEvent e) {
         try {
             
+            if(odtworz_ruchy){
+                if(!zresetowane_ruchy)resetuj_ruchy();
+                if(!obraca_sie()){
+                    switch(kolejnosc_ruchow[odtwarzany_ruch]){
+                        case 1: aktywna_sciana = 1; xplus = true; break;
+                        case -1: aktywna_sciana = 1; xminus = true; break;
+                        case 2: aktywna_sciana = 2; xplus = true; break;
+                        case -2: aktywna_sciana = 2; xminus = true; break;
+                        case 3: aktywna_sciana = 3; yplus = true; break;
+                        case -3: aktywna_sciana = 3; yminus = true; break;
+                        case 4: aktywna_sciana = 4; yplus = true; break;
+                        case -4: aktywna_sciana = 4; yminus = true; break;
+                        case 5: aktywna_sciana = 5; zplus = true; break;
+                        case -5: aktywna_sciana = 5; zminus = true; break;
+                        case 6: aktywna_sciana = 6; zplus = true; break;
+                        case -6: aktywna_sciana = 6; zminus = true; break;                  
+                    }
+                    zmien_sciane_do_obrotu(aktywna_sciana);
+                }
+            }
+            
             obroc_Zplus = sprawdz_czy_obrocic(zplus,obroc_Zplus,katZ,katZDocelowy, 3);
             obroc_Zminus = sprawdz_czy_obrocic(zminus,obroc_Zminus,katZ,katZDocelowy, -3);
             obroc_Yplus = sprawdz_czy_obrocic(yplus,obroc_Yplus,katY,katYDocelowy, 2);
             obroc_Yminus = sprawdz_czy_obrocic(yminus,obroc_Yminus,katY,katYDocelowy, -2);
             obroc_Xplus = sprawdz_czy_obrocic(xplus,obroc_Xplus,katX,katXDocelowy, 1);
             obroc_Xminus = sprawdz_czy_obrocic(xminus,obroc_Xminus,katX,katXDocelowy, -1);
-
+            
+            if(!obraca_sie() && odtworz_ruchy) odtwarzany_ruch++;
+            if(odtwarzany_ruch == licznik){
+                odtwarzany_ruch = 0;
+                zresetowane_ruchy = false;
+                odtworz_ruchy = false;
+            }
+            resetuj();
+            
             obrot();
             if(ulozona() && !poczatek){
                 JOptionPane.showMessageDialog(null, "Gratulacje ułożyłeś kostkę rubika :D"); 
@@ -817,8 +906,9 @@ public class Kostka_rubika extends javax.swing.JFrame implements  ActionListener
                 wybrano_sciane = false;
                 czas_startu = 0;
                 licznik = 0;
+                licznik_ruchow = 0;
                 Stoper.setText(String.valueOf(czas_startu));
-                Licznik.setText(String.valueOf(licznik));
+                Licznik.setText(String.valueOf(licznik_ruchow));
             }
             if(wybrano_sciane){
                 if(czas_startu==0)czas_startu = (int)(czas_nano.getValue()/1000000000);;
